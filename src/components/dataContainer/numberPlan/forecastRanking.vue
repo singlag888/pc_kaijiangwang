@@ -1,0 +1,227 @@
+<template>
+  <div class="searchBoxPop" v-show="isShowRank">
+    <div class="searchBox">
+      <div class="title">
+        <span>搜索计划</span>
+        <span class="close" @click="closeRank">X</span>
+      </div>
+      <div class="content">
+        <p>
+          选择游戏：
+          <select name="select" id="ssgamecode" v-model="curCode">
+            <option
+              :value="item.code"
+              v-for="(item,index) in lotteryCodes"
+              :key="index"
+              :selected="curLotteryCode == item.code?'selected':''"
+            >{{item.name}}</option>
+          </select>&nbsp;&nbsp;选择码数：
+          <select name="select" id="ssma" v-model="curQuantity">
+            <option
+              :value="item.forecast_quantity"
+              v-for="(item,index) in planData.forecast_quantity_list"
+              :key="index"
+            >{{item.forecast_quantity}}码</option>
+          </select>
+          <a id="ssbtn" href="javascript:();">立即搜索</a>
+        </p>
+        <div class="list">
+          <div class="plan-tab-main-index">
+            <ul class="dlbg">
+              <li>专家名称</li>
+              <li>车道</li>
+              <li>码数</li>
+              <li>成绩</li>
+              <li>胜率</li>
+              <li>盈利</li>
+              <li>查看</li>
+            </ul>
+            <div class="plan-table-content">
+              <router-link
+                target="_blank"
+                :to="'/Data/numberPlan?expertId='+item.expert_id+'&location='+item.location_key+'&forecastQuantity='+item.forecast_quantity+'&code='+curCode"
+                v-for="(item,index) in getCurList(list)"
+                :key="index"
+              >
+                <ul>
+                  <li>{{item.name}}</li>
+                  <li>{{item.location}}</li>
+                  <li>{{item.forecast_quantity}}码</li>
+                  <li>{{item.last_sum}}中{{item.result_sum}}</li>
+                  <li style="color:red">{{(item.result*100).toFixed(2)}}%</li>
+                  <li style="color:green">{{item.profit}}元</li>
+                  <li>查看</li>
+                </ul>
+              </router-link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+
+<script>
+import { mapActions, mapGetters } from "vuex";
+export default {
+  name: "ForecastRanking",
+  props: ["planData", "curForecastQuantity", "isShowRank"],
+  data() {
+    return {
+      curCode: this.curLotteryCode,
+      curQuantity:'',
+      list: []
+    };
+  },
+  methods: {
+    ...mapActions(["getForecastRanking", "chengecurLotteryCode"]),
+
+    goTo(code, expertId, location, forecastQuantity, path) {
+      this.closeRank();
+      this.chengecurLotteryCode(code);
+      this.$router.push({
+        path: path,
+        query: {
+          expertId: expertId,
+          location: location,
+          forecastQuantity: forecastQuantity
+        }
+      });
+    },
+
+    getCurList(list) {
+      let obj = [];
+      list && list.forEach(item => {
+        if (item.name == this.curQuantity) {
+          obj = item.list;
+        }
+      });
+      return obj;
+    },
+
+    closeRank() {
+      this.$emit("closeRank", false);
+    },
+
+    getForecastRankingFunc(code) {
+      this.getForecastRanking(code).then(res => {
+        if (res.code == 200) {
+          this.list = res.data;
+        }
+      });
+    }
+  },
+  created() {
+      this.curQuantity = this.curForecastQuantity;
+    this.curCode = this.curLotteryCode;
+    this.getForecastRankingFunc(this.curCode);
+  },
+  computed: {
+    ...mapGetters(["lotteryCodes", "curLotteryCode"])
+  },
+  watch: {
+      curQuantity(){
+          this.getCurList(this.list);
+      },
+    curCode() {
+      this.getForecastRankingFunc(this.curCode);
+    }
+  }
+};
+</script>
+
+<style lang="scss" scoped>
+.searchBoxPop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  .searchBox {
+    width: 600px;
+    height: 450px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    background-color: #fff;
+    .title {
+      height: 40px;
+      background-color: #444;
+      padding: 0 20px;
+      overflow: hidden;
+      display: flex;
+      font-size: 14px;
+      color: #fff;
+      justify-content: space-between;
+      align-items: center;
+      .close {
+        padding: 10px 20px;
+        box-sizing: border-box;
+        user-select: none;
+        cursor: pointer;
+      }
+    }
+    .content {
+      padding: 10px;
+      p {
+        select {
+          border: 1px solid #ddd;
+          height: 30px;
+          line-height: 30px;
+          border-radius: 2px;
+        }
+        #ssbtn {
+          display: inline-block;
+          height: 28px;
+          line-height: 28px;
+          text-align: center;
+          padding: 0 6px 0 6px;
+          border-radius: 3px;
+          font-size: 14px;
+          background: #e73f3f;
+          color: #fff;
+        }
+      }
+      .plan-tab-main-index {
+        margin-top: 4px;
+        ul {
+          background: #fbfbfb;
+          width: 100%;
+          display: flex;
+          li {
+            height: 32px;
+            line-height: 32px;
+            float: left;
+            display: block;
+            text-align: center;
+            font-size: 13px;
+            color: #777;
+            overflow: hidden;
+            flex: 1;
+          }
+        }
+        .plan-table-content {
+          a {
+            display: block;
+            background: #fff;
+            cursor: pointer;
+            &:link {
+              color: #333;
+              text-decoration: none;
+            }
+            ul {
+              overflow: hidden;
+              clear: both;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+</style>
