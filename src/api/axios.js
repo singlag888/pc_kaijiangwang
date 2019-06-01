@@ -7,6 +7,7 @@
 import axios from "axios";
 import Vue from "vue"
 import store from '@/store';
+
 import router from '@/router';
 import { loadAccessToken } from '@/assets/js/cache';
 import { getCurTime } from "@/assets/js/utils";
@@ -59,6 +60,7 @@ axios.interceptors.response.use(
           break;
         case 408:
           error.message = "请求超时";
+          router.push('/page408')
           break;
         case 500:
           error.message = "服务器端出错";
@@ -109,7 +111,6 @@ export default {
   get(urlObj, param) {
     if (urlObj.isOpenLoading) {
       // todo 待实现
-      // store.commit('SHOW_LOADING', true)
     }
     return new Promise((resolve, reject) => {
       clearTimeout(urlTimer[urlObj.url]);
@@ -129,15 +130,6 @@ export default {
           // console.log(res)
           if (res) {
             resolve(res && res.data);
-            // store.commit('SHOW_LOADING', false)
-
-            // setTimeout(() => {
-            //   store.commit('SHOW_LOADING', false)
-            // },500)
-
-            // Vue.nextTick(function () {
-            //   store.commit('SHOW_LOADING', false)
-            // })
           }
         });
       }, 500)

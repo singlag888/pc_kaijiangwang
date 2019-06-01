@@ -1,7 +1,10 @@
 import Vue from 'vue';
 
 // loading
-// export const showLoading =state=> state.showLoading;
+export const imgLoading =state=> state.imgLoading;
+
+// 是否暂无数据
+export const isNoContent =state=> state.isNoContent;
 
 // 当前彩种code
 export const curLotteryCode =state=> state.curLotteryCode;
@@ -21,9 +24,6 @@ export const adList =state=> state.adList;
 // 基础数据
 export const lotteryData =state=> state.lotteryData;
 
-// 基本趋势-统计
-export const basicTrend =state=> state.basicTrend;
-
 // 基础配置数据
 export const baseSettingData =state=> state.baseSettingData;
 
@@ -41,6 +41,9 @@ export const historyTitle =state=> {
     return state.historyTitle;
 };
 
+// 保存历史数据 code_type
+export const lotteryType =state=> state.lotteryType;
+
 //长龙数据
 export const dragonData =state=> state.dragonData;
 
@@ -53,6 +56,11 @@ export const socketOpenResult =state=> state.socketOpenResult;
 //websocket計劃
 export const socketPlanResult =state=> state.socketPlanResult;
 
+//websocket 时间
+export const socketUpdateTime =state=> state.socketUpdateTime;
+
 //大小单双分布
 export const screeningParameter =state=> state.screeningParameter;
 
+// 计划参数
+export const numberPlanParams =state=> state.numberPlanParams;

@@ -2,9 +2,20 @@ import * as types from './mutationsTypes'
 
 const mutations = {
   // loading
-  // [types.SHOW_LOADING](state, data) {
-  //   state.showLoading = data;
-  // },
+  [types.IMG_LOADING](state, data) {
+    let name = data.name
+    let show = data.show
+    for(let item of state.imgLoading) {
+      if(item.name == name) {
+        item.show = show
+      }
+    }
+  },
+
+  // 是否暂无数据
+  [types.IS_NO_CONTENT](state, data) {
+    state.isNoContent = data;
+  },
 
   // 当前彩种code
   [types.CUR_LOTTERY_CODE](state, code) {
@@ -34,11 +45,6 @@ const mutations = {
   // 基础数据
   [types.LOTTERY_DATA](state, list) {
     state.lotteryData = list;
-  },
-
-  // 基本趋势-统计
-  [types.BASIC_TREND](state, list) {
-    state.basicTrend = list;
   },
 
   // 基础配置数据
@@ -76,9 +82,24 @@ const mutations = {
     state.socketPlanResult = obj;
   },
 
+  //websocket 时间
+  [types.SOCKET_UPDATE_TIME](state, obj) {
+    state.socketUpdateTime = obj;
+  },
+
   //大小单双分布
   [types.SCREENING_PARAMETER](state, list) {
     state.screeningParameter = list;
+  },
+
+  //保存历史数据 code_type
+  [types.LOTTERY_TYPE](state, data) {
+    state.lotteryType = data;
+  },
+
+  //计划参数
+  [types.NUMBER_PLAN_PARAMS](state, obj) {
+    state.numberPlanParams = obj;
   }
 };
 

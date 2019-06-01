@@ -27,6 +27,7 @@
             <span>{{title[pIndex][cIndex].type_name[1]}}（{{calcTotalCount(title[pIndex][cIndex].type_name[1])}}）</span>
             <span class="c-red num-mc">{{title[pIndex][cIndex].location_name}}</span>
             <span class="c-red">{{title[pIndex][cIndex].type_name}}</span>
+            <span class="c-red">最新&nbsp;↓</span>
           </div>
         </div>
         <div class="table" ref="table">
@@ -174,6 +175,7 @@ export default {
         width: 100%;
         margin-top: -1px;
         overflow-x: scroll;
+        direction: rtl;
         table {
           width: 100%;
           box-sizing: border-box;

@@ -8,7 +8,9 @@ import axios from "./axios";
 import * as urls from "./apiUrl";
 import * as apiConfig from "./config";
 import store from '../store'
-
+export function getTest() {
+    return axios.get(urls.test(), {});
+}
 //  获取Token Code
 export function getAccessToken(params) {
     let param = Object.assign({}, {
@@ -68,6 +70,7 @@ export function getBasicTrend(params) {
     let param = Object.assign({}, {
         code: params.code,
         open_date: params.open_date,
+        location: params.location
     });
     return axios.get(urls.getBasicTrendAPI(), param);
 }
@@ -103,15 +106,6 @@ export function getAdvertisement(params) {
 //  彩种编码
 export function getLotteryCodes() {
     return axios.get(urls.getLotteryCodesAPI(), {});
-}
-
-//  基本走势
-export function getBasicTrendEveryPeriod(params) {
-    let param = Object.assign({}, {
-        open_date: params && params.open_date,
-        code: params && params.code,
-    });
-    return axios.get(urls.getBasicTrendEveryPeriodAPI(), param);
 }
 
 //  路珠走势

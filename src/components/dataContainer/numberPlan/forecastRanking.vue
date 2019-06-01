@@ -3,7 +3,7 @@
     <div class="searchBox">
       <div class="title">
         <span>搜索计划</span>
-        <span class="close" @click="closeRank">X</span>
+        <span class="close" @click="closeRank">╳</span>
       </div>
       <div class="content">
         <p>
@@ -12,18 +12,19 @@
             <option
               :value="item.code"
               v-for="(item,index) in lotteryCodes"
+              v-show="item.is_forecast_rule == 1"
               :key="index"
               :selected="curLotteryCode == item.code?'selected':''"
             >{{item.name}}</option>
           </select>&nbsp;&nbsp;选择码数：
           <select name="select" id="ssma" v-model="curQuantity">
             <option
-              :value="item.forecast_quantity"
+              :value="item"
               v-for="(item,index) in planData.forecast_quantity_list"
               :key="index"
-            >{{item.forecast_quantity}}码</option>
+            >{{item}}码</option>
           </select>
-          <a id="ssbtn" href="javascript:();">立即搜索</a>
+          <a id="ssbtn" href="javascript:void(0)">立即搜索</a>
         </p>
         <div class="list">
           <div class="plan-tab-main-index">
@@ -37,13 +38,13 @@
               <li>查看</li>
             </ul>
             <div class="plan-table-content">
-              <router-link
+              <!-- <router-link
                 target="_blank"
                 :to="'/Data/numberPlan?expertId='+item.expert_id+'&location='+item.location_key+'&forecastQuantity='+item.forecast_quantity+'&code='+curCode"
                 v-for="(item,index) in getCurList(list)"
                 :key="index"
-              >
-                <ul>
+              > -->
+                <ul class="item" v-for="(item,index) in getCurList(list)" :key="index" @click="goTo(item.expert_id, item.location_key, item.forecast_quantity)">
                   <li>{{item.name}}</li>
                   <li>{{item.location}}</li>
                   <li>{{item.forecast_quantity}}码</li>
@@ -52,7 +53,7 @@
                   <li style="color:green">{{item.profit}}元</li>
                   <li>查看</li>
                 </ul>
-              </router-link>
+              <!-- </router-link> -->
             </div>
           </div>
         </div>
@@ -70,24 +71,16 @@ export default {
   data() {
     return {
       curCode: this.curLotteryCode,
-      curQuantity:'',
+      curQuantity: 0,
       list: []
     };
   },
   methods: {
     ...mapActions(["getForecastRanking", "chengecurLotteryCode"]),
 
-    goTo(code, expertId, location, forecastQuantity, path) {
+    goTo(expertId, location, forecastQuantity) {
       this.closeRank();
-      this.chengecurLotteryCode(code);
-      this.$router.push({
-        path: path,
-        query: {
-          expertId: expertId,
-          location: location,
-          forecastQuantity: forecastQuantity
-        }
-      });
+      this.$store.commit('NUMBER_PLAN_PARAMS', { expertId, location, forecastQuantity})
     },
 
     getCurList(list) {
@@ -113,7 +106,7 @@ export default {
     }
   },
   created() {
-      this.curQuantity = this.curForecastQuantity;
+    this.curQuantity = this.curForecastQuantity;
     this.curCode = this.curLotteryCode;
     this.getForecastRankingFunc(this.curCode);
   },
@@ -121,12 +114,21 @@ export default {
     ...mapGetters(["lotteryCodes", "curLotteryCode"])
   },
   watch: {
-      curQuantity(){
-          this.getCurList(this.list);
-      },
+    curQuantity(){
+      this.getCurList(this.list);
+    },
     curCode() {
       this.getForecastRankingFunc(this.curCode);
+    },
+    planData() {
+      // 如果当前码数为 0 选择第一个
+      if(this.curQuantity == 0) {
+        this.curQuantity = this.planData.forecast_quantity_list[0]
+      }
     }
+  },
+  mounted() {
+
   }
 };
 </script>
@@ -206,6 +208,9 @@ export default {
           }
         }
         .plan-table-content {
+          .item{
+            cursor: pointer;
+          }
           a {
             display: block;
             background: #fff;
@@ -214,7 +219,7 @@ export default {
               color: #333;
               text-decoration: none;
             }
-            ul {
+            ul { 
               overflow: hidden;
               clear: both;
             }

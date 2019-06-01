@@ -47,12 +47,9 @@ export default {
     },
     methods:{
         ...mapActions(['getArticleCategory', 'getLotteryCodes']),
-        // hanldClick(url) {
-        //     goImgUrl(url)
-        // }
     },
     computed:{
-        // ...mapGetters(['adList'])
+
     },
     mounted() {
         

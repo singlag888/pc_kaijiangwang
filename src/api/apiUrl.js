@@ -5,7 +5,12 @@
  * @Last Modified by: a.rui
  * @Last Modified time: 2019-04-20 18:41:07
  */
-
+export function test(){
+    return {
+        url: `/v1/tests/index`,
+        isOpenLoading: false
+    }
+}
 //  获取Token Code
 export function getAccessTokenAPI(){
     return {
@@ -90,14 +95,6 @@ export function getAdvertisementAPI(){
 export function getLotteryCodesAPI(){
     return {
         url: `/v1/lotteryCodes`,
-        isOpenLoading: false
-    }
-}
-
-//  基本走势 
-export function getBasicTrendEveryPeriodAPI(){
-    return {
-        url: `/v1/basicTrendEveryPeriod`,
         isOpenLoading: false
     }
 }

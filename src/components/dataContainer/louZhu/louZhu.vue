@@ -119,9 +119,10 @@
         </div>
       </div>
       <!-- 露珠走势 -->
-      <div v-if="glassBeadList.length == 0" class="loading-img">
+      <div class="loading-img" v-if="imgLoaderShow">
         <img src="../../../assets/images/Ellipsis-1s-100px.gif" alt="">
-      </div> 
+      </div>
+      <div v-if="isNoContent" class="no-content">暂无数据</div>
       <div
         v-else
         v-for="(item,index) in glassBeadList && glassBeadList.list"
@@ -234,6 +235,12 @@ export default {
       this.glassBeadList = []
       this.getGlassBeadTrend({ code: code, open_date: date }).then(res => {
         if (res.code == 200) {
+          // 无数据状态
+          if(res.data.list.length == 0) {
+            this.$store.commit('IS_NO_CONTENT', true)
+          }else {
+            this.$store.commit('IS_NO_CONTENT', false)
+          }
           let tempArr = [];
           this.titleList = [];
           this.playList = [];
@@ -251,6 +258,7 @@ export default {
             this.playList.push(item);
           });
           this.changeTabIndex(this.tabIndex);
+          this.$store.commit('IMG_LOADING', {name: 'louZhu', show: false});
         }
       });
     },
@@ -312,22 +320,19 @@ export default {
     Trend
   },
   computed: {
-    ...mapGetters(["curLotteryCode", "socketOpenResult","lotteryCodes"]),
-    curCodeInfo() {
-      let codes = {};
-      this.lotteryCodes.forEach(item => {
-        if (item.code == this.curLotteryCode) {
-          codes = item;
+    ...mapGetters(["curLotteryCode", "socketOpenResult", "lotteryCodes", "imgLoading", "isNoContent"]),
+
+    // 加载 loading
+    imgLoaderShow() {
+      for(let item of this.imgLoading) {
+        if(item.name == 'louZhu') {
+          return item.show
         }
-      });
-      return codes;
+      }
     }
   },
   watch: {
     curLotteryCode: function() {
-      if (this.curCodeInfo.is_road_beads == 0) {
-        this.$router.push("./historyData");
-      }
       this.getGlassBeadTrendFunc(this.curLotteryCode, getCurTime("YYYY-MM-DD"));
     },
     socketOpenResult: function() {
@@ -350,6 +355,7 @@ export default {
 .loading-img{
   text-align: center
 }
+.no-content{text-align: center;font-size: 20px;color: #666;line-height: 50px;}
 .louZhu {
   .data {
     padding: 20px;

@@ -22,7 +22,6 @@ export default {
     this.getArticlesInfo(this.$route.params.id).then(res => {
       if (res.code == 200) {
         this.articles = res.data;
-        // console.log('tttttttttttt',res);
       }
     });
   },

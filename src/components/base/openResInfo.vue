@@ -10,39 +10,35 @@
                     <span class="qs">{{curReslut.expect}}</span>
                     期
                 </h1>
-                <p>当前<span class="drawCount">{{curReslut.today_expect}}</span>期，剩<span class="sdrawCountnext">{{curReslut.remaining_expect}}</span>期</p>
+                <p v-show="isShowPeriods">当前<span class="drawCount">{{curReslut.today_expect}}</span>期，剩<span class="sdrawCountnext">{{curReslut.remaining_expect}}</span>期</p>
                 <!-- 开奖号码 -->
                 <open-code :isOPen="isOPen" class="openCode" :code="curReslut.code" :codeType="curReslut.code_type" :result="curReslut.open_numbers"/>
             </div>
             <div class="timeDown">
                 <div class="openTimeTips">距<span>{{curReslut.next_expect}}</span>期开奖</div>
                 <!-- 倒计时 -->
-                <time-down  @callBackFunc="callBackFunc" :isLastQs="curReslut.remaining_expect" :time="curReslut.next_open_seconds"/>
+                <time-down  @callBackFunc="callBackFunc" :isLastQs="curReslut.remaining_expect" :time="nextOpenSeconds"/>
             </div>
         </div>
         <!-- 长龙  todo  抽出来做组建 -->
         <div class="resTable" v-if="isShowChangLong" >
             <table border="0" cellpadding="1" cellspacing="1">
-            <tbody><tr>
-                <th v-for="(item,index) in result.NoScreeningParameter" :key="index+index+'_t_'" :colspan="item.data.length">{{item.name}}</th>
-            </tr>
-            <tr>
-              <template v-for="(item,index) in result.NoScreeningParameter" >
-                <td v-for="(obj,key) in item.data" :key="+key+'_k_'+index">{{obj}}</td>
-              </template>
-            </tr>
-        </tbody>
-        </table>
-            <div class="more">
-                <a href="javascript:;" @click="goTo(curReslut.code, '/Data/luZhu')">龙虎路珠</a>
-                <a href="javascript:;" @click="goTo(curReslut.code, '/Data/trendChart')">位置走势</a>
-                <a href="javascript:;" @click="goTo(curReslut.code, '/Data/trendChart')">长龙提醒</a>
-                <a href="javascript:;" @click="goTo(curReslut.code, '/Data/hotNumber')">冷热分析</a>
-                <!-- <router-link :to="'/Data/luZhu'">龙虎路珠</router-link>
-                <router-link :to="'/Data/trendChart'">位置走势</router-link>
-                <router-link :to="'/Data/trendChart'">长龙提醒</router-link>
-                <router-link :to="'/Data/hotNumber'">冷热分析</router-link> -->
-            </div>
+              <tbody><tr>
+                  <th v-for="(item,index) in result.NoScreeningParameter" :key="index+index+'_t_'" :colspan="item.data.length">{{item.name}}</th>
+              </tr>
+              <tr>
+                <template v-for="(item,index) in result.NoScreeningParameter" >
+                  <td v-for="(obj,key) in item.data" :key="+key+'_k_'+index">{{obj}}</td>
+                </template>
+              </tr>
+            </tbody>
+          </table>
+          <div class="more">
+            <a href="javascript:;" @click="goTo(curReslut.code, '/Data/luZhu')">龙虎路珠</a>
+            <a href="javascript:;" @click="goTo(curReslut.code, '/Data/trendChart')">位置走势</a>
+            <a href="javascript:;" @click="goTo(curReslut.code, '/Data/trendChart')">长龙提醒</a>
+            <a href="javascript:;" @click="goTo(curReslut.code, '/Data/hotNumber')">冷热分析</a>
+          </div>
         </div>
     </div>
 </template>
@@ -58,16 +54,11 @@ export default {
     isShowChangLong: {
       type: Boolean,
       default: false
-    },
-    // 开奖号码信息
-    result:{
-      type: [Object,Array],
-      default:{}
     }
   },
   data() {
     return {
-      curReslut: this.result,
+      curReslut: {},
       isOPen: false
     };
   },
@@ -82,17 +73,37 @@ export default {
     }
   },
   computed:{
-    ...mapGetters(['socketOpenResult']),
+    ...mapGetters(['socketOpenResult', 'socketUpdateTime', 'openResult']),
+    // 是否显示当前期数和剩余期数
+    isShowPeriods() {
+      if(this.curReslut.code == 'hk6' || this.curReslut.code == 'fc3d' || this.curReslut.code == 'pl3') {
+        return false
+      } else {
+        return true 
+      }     
+    },
+    // 精确时间
+    nextOpenSeconds() {
+      if(this.socketUpdateTime.length == undefined) {
+        return this.curReslut.next_open_seconds
+      }else {
+        for(let item of this.socketUpdateTime) {
+          if(item.code == this.curReslut.code) {
+            return item.next_open_seconds
+          }
+        }
+      }      
+    }
   },
   watch:{
-    result:function(){
-      this.curReslut = this.result;
-    },
     socketOpenResult:function(){
       if(this.socketOpenResult.code == this.curReslut.code){
         this.curReslut = this.socketOpenResult;
       }
-    }
+    },
+    openResult() {
+      this.curReslut = this.openResult
+    }   
   },
   components: {
     OpenCode,
@@ -141,7 +152,7 @@ export default {
       }
     }
     .timeDown {
-      width: 175px;
+      // width: 175px;
       display: flex;
       flex-direction: column;
       justify-content: center;

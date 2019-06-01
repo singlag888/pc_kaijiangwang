@@ -22,7 +22,7 @@ function activateflame(pos2, divnum) {
 	}
 }
 $(function(){
-	console.log('main.js载入');
+	// console.log('main.js载入');
 	$(".currentdraw").on("click", "#closeSound", function() {
 		 if($(this).hasClass("closesoundbtn")){
 		 	$(this).removeClass("closesoundbtn");
@@ -258,7 +258,7 @@ export function startcountdown(timer,code) {
 	TweenLite.killDelayedCallsTo(winnerpage);
 	$(".page1").css("display", "block");
 	$(".page2").css("display", "none");
-	console.log(waitfinish)
+	// console.log(waitfinish)
 	if(waitfinish == true) {
 		return false;
 	}
@@ -434,6 +434,7 @@ function startanimation() {
 }
 
 function windflameani() {
+	// console.log($(".wind"))
 	$(".wind").animate({
 		opacity: 0.70
 	}, 150, function() {
@@ -451,7 +452,7 @@ var animation3 = setInterval(function() {
 	windflameani();
 }, 150);
 
-function stopanimation() {
+export function stopanimation() {
 	$("#roaditm").css("left", "-1300px");
 	$("#scenaryitm").css("left", "-1334px");
 	$(".wind").css("display", "none");
@@ -685,6 +686,6 @@ videoTools.ifsund = function() {
 	} else {
 		flag = true;
 	}
-	console.log("flag："+flag);
+	// console.log("flag："+flag);
 	return flag
 }

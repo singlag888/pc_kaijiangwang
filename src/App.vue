@@ -1,17 +1,14 @@
 <template>
   <div id="app">
     <router-view/>
-    <!-- <Loading v-show="showLoading"></Loading> -->
   </div>
 </template>
 
 <script>
 import {mapActions, mapState, mapGetters} from 'vuex';
-// import Loading from '@/components/Loading'
 
 export default {
   name: 'App',
-  // components: { Loading },
   data() {
     return {
       
@@ -19,19 +16,36 @@ export default {
   },
   mounted(){
     this.$nextTick(()=>{
-      // if(!this.baseSettingData.site_status || this.baseSettingData.site_status == 0){
-      //   this.$router.push('/page404');
-      // }
+
     })
     this.getLotteryCodes()
   },
   methods:{
-    ...mapActions(['getLotteryCodes']),
+    ...mapActions(['getLotteryCodes'])
   },
   computed: {
-    // ...mapGetters(['showLoading'])
-    // ...mapState(['baseSettingData'])
+    ...mapGetters(['baseSettingData'])
   },
+  watch: {
+    // 客服
+    'baseSettingData.service_code': {
+      handler(val) {
+        let c = document.createElement('script');
+        c.src = val;
+        let s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(c, s);
+      }
+    },
+    // 站点统计
+    'baseSettingData.site_statis': {
+      handler(val) {
+        let c = document.createElement('script');
+        c.src = val;
+        let s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(c, s);
+      }
+    }
+  }
 }
 </script>
 

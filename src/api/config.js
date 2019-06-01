@@ -20,6 +20,7 @@ export const signature = build_signature({ app_id: app_id, grant_type: grant_typ
 function build_signature(param) {
     // appSecret
     const appSecret = 'ZrIn80rRrNSRREirS9Rx0PrRUnnk7RXI';
+    // const appSecret = 'aFXqzhIbO54498u2p5UpQ4F85HCCf89U'; // huidu
     if (!param) return '';
     let arr = []
     for (let i in param) {
@@ -28,7 +29,7 @@ function build_signature(param) {
         arr.push(o)
     }
     
-    let str = JSON.stringify(arr.sort()).replace(/[{[\,\:\"\]}]/g, "");
+    let str = JSON.stringify(arr).replace(/[{[\,\:\"\]}]/g, "");
     str = str.replace(/[|]/g,":");
     str = appSecret + str + appSecret;
     str = jsMd5(str).toUpperCase();

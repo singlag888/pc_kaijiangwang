@@ -5,14 +5,8 @@
     </div>
     <div class="container">
       <div class="header" :class="curLotteryCode.indexOf('ft')!=-1?'ft':'sc'">
-        <!-- <audio
-          id="sound"
-          autoplay="autoplay"
-          :src="require('../../../assets/video/sound/staring.mp3')"
-          loop="loop"
-        ></audio> -->
         <div class="logo">
-          <img :src="require(`../../../assets/video/images/${curLotteryCode}.png`)" width="309" height="59" alt>
+          <img :src="curReslut.live_logo" width="309" height="59" alt>
         </div>
         <div class="position">
           <div class="positm" id="pos1"></div>
@@ -328,8 +322,6 @@
       <div class="flashlight" style="display: none;"></div>
       <div class="soundbox">
 			<audio :src="require('../../../assets/video/sound/cuttime.mp3')" id="sound" ></audio>
-			<!-- <audio :src="require('../../../assets/video/sound/over.mp3')" id="over"></audio>
-			<audio :src="require('../../../assets/video/sound/staring.mp3')" id="staring"></audio> -->
 		</div>
 
     </div>
@@ -338,7 +330,6 @@
 <script>
 import { mapActions, mapGetters } from "vuex";
 import "../../../assets/video/css/animate.min.css";
-// import '../../../assets/video/css/fonts.css'
 import "../../../assets/video/css/main.css";
 import "../../../assets/video/css/style.scss";
 import "../../../assets/video/js/jquery-1.11.2.min.js";
@@ -346,7 +337,8 @@ import {
   startcountdown,
   showcurrentresult,
   finishgame,
-  settingIsOpen
+  settingIsOpen,
+  stopanimation
 } from "../../../assets/video/js/main.js";
 
 export default {
@@ -362,24 +354,27 @@ export default {
       var W = 1200;
       var H = 870;
       var zoomW = W / 1335;
-      $(".container").css("zoom", zoomW);
-      $(".container").css({
+      $("#layaContainer .container").css("zoom", zoomW);
+      $("#layaContainer .container").css({
         "-moz-transform": "scale(" + zoomW + ")",
         "-moz-transform-origin": "top left"
       });
-      this.firstLoad=true;
-      this.getLotteryExpect(this.curLotteryCode);
-      this.insertDataWarp(this.openResult);
 
+      this.firstLoad=true;
+      let curCode = this.$route.params.code;
+      this.chengecurLotteryCode(curCode)
+      this.getLotteryExpect(curCode);
+      this.insertDataWarp(this.openResult);
     });
   },
 
   methods: {
-    ...mapActions(['getLotteryExpect']),
+    ...mapActions(['getLotteryExpect','chengecurLotteryCode']),
 
-    insertDataWarp(openResult,isOPen){      
+    insertDataWarp(openResult,isOPen){  
+      this.curReslut = openResult;
+      if(openResult.code != this.curLotteryCode)  return;
       var ticking = isOPen ? 0 : openResult.next_open_seconds;
-      // settingIsOpen(isOPen)
       if (this.firstLoad) {
         settingIsOpen(true)
         this.firstLoad = false;
@@ -394,7 +389,7 @@ export default {
 
     insertData(openResult,ticking) {
       if(!openResult.next_open_seconds) return;
-      console.log(openResult)
+      // console.log(openResult)
       //切换到开奖
       startcountdown(ticking,this.curLotteryCode);
       showcurrentresult(openResult.open_numbers);
@@ -403,16 +398,18 @@ export default {
       // 开奖期号
       $("#nextdrawtime").text(openResult.expect);
       // 冠亚和数据
-      $("#stat1_1").text(openResult.open_numbers[5]);
-      $("#stat1_2").text(openResult.open_numbers[6]);
-      $("#stat1_3").text(openResult.open_numbers[7]);
+      $("#stat1_1").text(openResult.NoScreeningParameter[1].data[0]);
+      $("#stat1_2").text(openResult.NoScreeningParameter[1].data[1]);
+      $("#stat1_3").text(openResult.NoScreeningParameter[1].data[2]);
       // 龙虎
       for (var i = 0; i < 5; i++) {
-        $("#stat2_" + (i + 1)).text(openResult.open_numbers[i]);
+        $("#stat2_" + (i + 1)).text(openResult.NoScreeningParameter[0].data[i]);
       }
     }
   },
-
+  destroyed(){
+    stopanimation();
+  },
   computed: {
     ...mapGetters(["curLotteryCode", "openResult", "lotteryCodes","socketOpenResult"])
   },
@@ -424,9 +421,9 @@ export default {
 
     socketOpenResult(){
       if(this.socketOpenResult.code == this.curLotteryCode){
-        console.log(this.socketOpenResult)
+        // console.log(this.socketOpenResult)
         let isOPen = parseInt(this.openResult.expect)- parseInt(this.socketOpenResult.expect)  >=2 && parseInt(this.openResult.expect)- parseInt(this.socketOpenResult.expect) <=3;
-        console.log(isOPen)
+        // console.log(isOPen)
         this.insertDataWarp(this.socketOpenResult,isOPen);
       }
     }

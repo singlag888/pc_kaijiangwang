@@ -1,13 +1,22 @@
 <template>
   <div class="navContainer" v-if="lotteryCodes">
     <ul class="nav">
-      <li v-for="(item, index) of lotteryCodes" :class="{'active':item.code == curLotteryCode}" @click="changeLotteryCode(item.code)" :key="index" v-show="index<10">{{item.name}}</li>
+      <li
+        v-for="(item, index) of lotteryCodes"
+        :class="{'active':item.code == curLotteryCode}"
+        @click="changeLotteryCode(item.code)"
+        :key="index"
+        v-show="index < 10"
+      >{{item.name}}</li>
       <li
         :class="['gamesHall', {'navHover': mouseonNavGameshall || mouseonGamesContainer}]"
         @mousemove="mouseonNavGameshall = true"
         @mouseout="mouseonNavGameshall = false"
-        v-show="lotteryCodes.length>9"
-      >更多彩种<i class="fas fa-bars"></i></li>
+        v-show="lotteryCodes.length > 10"
+      >
+        更多彩种
+        <i class="fas fa-bars"></i>
+      </li>
     </ul>
     <div
       class="gamesContainer"
@@ -33,7 +42,7 @@ import { GAMESGROUP } from "@/config/config";
 import { mapGetters, mapActions } from "vuex";
 export default {
   name: "VNav",
-  props:['lotteryCodes'],
+  props: ["lotteryCodes"],
   data() {
     return {
       mouseonNavGameshall: false,
@@ -46,20 +55,25 @@ export default {
     // console.log(GAMESGROUP);
   },
   computed: {
-    ...mapGetters(["curLotteryCode", 'baseSettingData'])
+    ...mapGetters(["curLotteryCode", "baseSettingData"])
   },
   methods: {
     ...mapActions(["chengecurLotteryCode"]),
 
     // 切换彩种
     changeLotteryCode(code) {
-      if (this.$route.path.indexOf("Data") != -1 && code != 'bjkl8' || this.$route.path == '/forecastOverview') {
-        this.chengecurLotteryCode(code);
-      } else {
-        this.chengecurLotteryCode(code);
-        this.$router.push("/Data/historyData");
-      }
-    },
+      this.chengecurLotteryCode(code);
+      this.$router.push("/Data/historyData");
+      // if (this.$route.path.indexOf("Data") != -1 && code != 'bjkl8' || this.$route.path == '/forecastOverview') {
+      //   this.chengecurLotteryCode(code);
+      // } else {
+      //   this.chengecurLotteryCode(code);
+      //   this.$router.push("/Data/historyData");
+      // }
+    }
+  },
+  watch: {
+
   }
 };
 </script>
@@ -79,11 +93,12 @@ export default {
       font-size: 14px;
       flex: 1;
       cursor: pointer;
-      &:hover,&.active {
+      &:hover,
+      &.active {
         color: #e73f3f;
         background-color: #fff;
       }
-      svg{
+      svg {
         margin-left: 5px;
       }
     }
@@ -91,7 +106,8 @@ export default {
   .gamesHall {
     margin-bottom: 0;
   }
-  .navHover,.router-link-active{
+  .navHover,
+  .router-link-active {
     color: #e73f3f !important;
     background-color: #fff;
   }
@@ -131,7 +147,8 @@ export default {
           padding: 2px 8px;
           border-radius: 4px;
           color: #555;
-          &:hover,&.active {
+          &:hover,
+          &.active {
             background: #e73f3f;
             color: #fff !important;
           }

@@ -14,7 +14,7 @@
     <!-- 推送 -->
     <div class="push">
       <transition-group name="fade" tag="div">
-        <p class="item" @click="goTo(item.code,item.expert_id,item.location,item.forecast_quantity, '/Data/numberPlan')" v-for="(item, index) in pushArr"  :key="index">通知：{{item.name}}出现【{{item.last_count}}中{{item.result_sum}}】
+        <p class="item" @click="goTo(item.code, item.expert_id, item.location, item.forecast_quantity)" v-for="(item, index) in pushArr"  :key="index">通知：{{codesName[index]}}出现【{{item.last_count}}中{{item.result_sum}}】
           <span class="info">查看</span>
         </p>
       </transition-group>  
@@ -36,7 +36,8 @@ export default {
   data () {
     return {
       advertisementArr: [],
-      pushArr: []
+      pushArr: [],
+      codesName: []
     }
   },
   created(){ 
@@ -51,30 +52,44 @@ export default {
     });
   },
   computed: {
-    ...mapGetters(['socketPlanResult'])
+    ...mapGetters(['socketPlanResult', 'lotteryCodes'])
   },
   methods:{
     ...mapActions(['getAdvertisement', 'chengecurLotteryCode']),
     go(url) {
       goImgUrl(url)
     },
-    goTo(code, expertId, location, forecastQuantity, path) {
+    goTo(code, expertId, location, forecastQuantity) {
       this.chengecurLotteryCode(code);
-      this.$router.push({ path: path, query: { expertId: expertId,location:location,forecastQuantity:forecastQuantity } });
+      this.$store.commit('NUMBER_PLAN_PARAMS', { expertId, location, forecastQuantity})
+      this.$router.push({name: 'numberPlan'}) 
     },
   },
   watch: {
     socketPlanResult() {
-      this.pushArr.push(this.socketPlanResult)
-      if(this.pushArr.length > 3) {
-        this.pushArr.shift()
-      }
+      for(let item of this.lotteryCodes) {
+        if(item.code == this.socketPlanResult.code) {
+          if(item.is_forecast_rule == 1) {
+            this.codesName.push(item.name)
+            this.pushArr.push(this.socketPlanResult)
+            if(this.pushArr.length > 3) {
+              this.pushArr.shift()
+            }
+            if(this.codesName.length >3) {
+              this.codesName.shift()
+            }
+          }
+        }
+      }     
     },
     pushArr() {
       let _this = this
       setTimeout(() => {
         if(_this.pushArr.length != 0) {
           _this.pushArr.shift()
+        }
+        if(_this.codesName.length != 0) {
+          _this.codesName.shift()
         }
       },10000)
     }
@@ -94,14 +109,13 @@ export default {
         cursor: pointer;
         width: 100%;
         margin-bottom: 15px;
-        // margin: 15px 0;
       }
     }
     .push{
-      position: fixed;bottom: 10px;right: 0;color: hsla(0,0%,100%,.7);height: 142px;width: 280px;
+      position: fixed;bottom: 10px;right: 0;color: hsla(0,0%,100%,.7);height: 142px;width: 290px;
       .item{
         position:absolute;right: 0;cursor: pointer;
-        background: #565c70;line-height: 42px;width: 280px;font-size: 15px;border-radius: 5px;opacity: 1;text-align: center;
+        background: #565c70;line-height: 42px;width: 290px;font-size: 15px;border-radius: 5px;opacity: 1;text-align: center;
         margin-bottom: 5px;
         .info{color: #FFFF00;} 
       }
@@ -118,7 +132,7 @@ export default {
         transition: all .5s
       }
       .fade-enter, .fade-leave-active {
-        opacity: 0;right: -280px;
+        opacity: 0;right: -290px;
       }
     }
   }

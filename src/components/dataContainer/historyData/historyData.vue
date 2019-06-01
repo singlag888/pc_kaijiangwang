@@ -2,8 +2,8 @@
   <div class="historyData pageWidth">
     <div class="titleBox">
       <label
-        @click="isShowSidesTotal = !isShowSidesTotal"
-        v-show="sidesTotal.length>0"
+        @click="isShowSidesTotal = !isShowSidesTotal"       
+        v-if="isSidesTotal == 1"
         :class="{'active':isShowSidesTotal}"
       >
         <b>
@@ -15,7 +15,7 @@
       </label>
       <label
         @click="isShowLongDragon = !isShowLongDragon"
-        v-show="dragonData.length>0"
+        v-if="isLongDragon == 1"
         :class="{'active':isShowLongDragon}"
       >
         <b>
@@ -37,54 +37,59 @@
         ></datepicker>
       </div>
     </div>
-    <div class="liangmian" v-show="isShowSidesTotal" v-if="isSidesTotal == 1">
-      <div v-if="sidesTotal.length == 0" class="loading-img">
-        <img src="../../../assets/images/Ellipsis-1s-100px.gif" alt="">
-      </div>    
-      <table v-else class="liangmianTable" border="1">
-        <tr>
-          <td
-            v-for="(thData, index) in sidesTotal && filterData(sidesTotal)"
-            :key="index+'_a_'+thData.location_name"
-            :colspan="thData.len"
-          >{{thData.location_name}}</td>
-        </tr>
-        <tr>
-          <template v-for="(data, index) in sidesTotal && filterData(sidesTotal)">
+    <div class="liangmian" v-show="isShowSidesTotal">   
+      <div v-if="isSidesTotal == 1">
+        <div class="loading-img" v-if="imgLoaderShow('sidesTotal')">
+          <img src="../../../assets/images/Ellipsis-1s-100px.gif" alt="">
+        </div>
+        <div v-if="sidesTotal.length == 0"></div>
+        <table v-else class="liangmianTable" border="1">
+          <tr>
             <td
-              v-show="data.location == item.location"
-              v-for="(item, key) in sidesTotal"
-              :key="index+key+'_b_'+data.location"
-            >{{item.result}}</td>
-          </template>
-        </tr>
-        <tr>
-          <template v-for="(data, index) in sidesTotal && filterData(sidesTotal)">
-            <td
-              v-show="data.location == item.location"
-              v-for="(item, key) in sidesTotal"
-              :key="index+key+'_c_'+item.id"
-            >{{item.count}}</td>
-          </template>
-        </tr>
-      </table>
+              v-for="(thData, index) in sidesTotal && filterData(sidesTotal)"
+              :key="index+'_a_'+thData.location_name"
+              :colspan="thData.len"
+            >{{thData.location_name}}</td>
+          </tr>
+          <tr>
+            <template v-for="(data, index) in sidesTotal && filterData(sidesTotal)">
+              <td
+                v-show="data.location == item.location"
+                v-for="(item, key) in sidesTotal"
+                :key="index+key+'_b_'+data.location"
+              >{{item.result}}</td>
+            </template>
+          </tr>
+          <tr>
+            <template v-for="(data, index) in sidesTotal && filterData(sidesTotal)">
+              <td
+                v-show="data.location == item.location"
+                v-for="(item, key) in sidesTotal"
+                :key="index +' '+ key+'_c_'"
+              >{{item.count}}</td>
+            </template>
+          </tr>
+        </table>
+      </div>
     </div>
-    <!-- && dragonData.length>0 -->
-    <div class="changlong" v-show="isShowLongDragon" v-if="isLongDragon == 1">
-      <div v-if="dragonData.length == 0" class="loading-img">
-        <img src="../../../assets/images/Ellipsis-1s-100px.gif" alt="">
-      </div> 
-      <table v-else class="changlongTable" cellpadding="0" cellspacing="0">
-        <th colspan="12">长龙连开提醒</th>
-        <tr>
-          <td>
-            <span
-              v-for="(data, index) in dragonData"
-              :key="index+'_d'"
-            >{{data.location_name}}:{{data.result}} {{data.continuous}} 期</span>
-          </td>
-        </tr>
-      </table>
+    <div class="changlong" v-show="isShowLongDragon">
+      <div v-if="isLongDragon == 1">
+        <div class="loading-img" v-if="imgLoaderShow('dragonData')">
+          <img src="../../../assets/images/Ellipsis-1s-100px.gif" alt="">
+        </div> 
+        <div v-if="dragonData.length == 0"></div>
+        <table v-else class="changlongTable" cellpadding="0" cellspacing="0">
+          <th colspan="12">长龙连开提醒</th>
+          <tr>
+            <td>
+              <span
+                v-for="(data, index) in dragonData"
+                :key="index+'_d'"
+              >{{data.location_name}}:{{data.result}} {{data.continuous}} 期</span>
+            </td>
+          </tr>
+        </table>
+      </div>
     </div>
     <div class="dataTabs">
       <div class="numBtn" v-show="curLotteryNumbers.length>0">
@@ -139,9 +144,16 @@
             <template v-show="!Array.isArray(item)">{{item.type_name}}</template>
           </td>
         </tr>
-        <tr v-if="lotteryData.length == 0">
+        <tr v-if="imgLoaderShow('historyData')">
           <td colspan="10">
-            <img src="../../../assets/images/Ellipsis-1s-100px.gif" alt="">
+            <div>
+              <img src="../../../assets/images/Ellipsis-1s-100px.gif" alt="">
+            </div>
+          </td>               
+        </tr>
+        <tr v-if="isNoContent">
+          <td colspan="10">
+            <span class="no-content">暂无数据</span>
           </td>               
         </tr>
         <tr v-else v-for="(item, index) in lotteryData" :key="index+'_t'">
@@ -155,7 +167,7 @@
               :selectedTableShowData="selectedTableShowData"
               :allResult="item.data"
               :code="item.code"
-              :codeType="item.code_type"
+              :codeType="lotteryType"
               :result="item.data[selectedTableShowData]"
             />
           </td>
@@ -284,6 +296,7 @@ export default {
       }).then(res => {
         if (res.code == 200) {
           this.sidesTotal = res.data;
+          this.$store.commit('IMG_LOADING', {name: 'sidesTotal', show: false});
           //console.log(this.sidesTotal)
         }
       });
@@ -322,7 +335,7 @@ export default {
     }
   },
   computed: {
-    // 判断是否为双面统计
+    // 判断是否有双面统计功能
     isSidesTotal() {
       for(let item of this.lotteryCodes) {
         if(item.code == this.curLotteryCode) {
@@ -330,11 +343,21 @@ export default {
         }
       }
     },
-    // 判断是否为长龙
+    // 判断是否有长龙功能
     isLongDragon() {
       for(let item of this.lotteryCodes) {
         if(item.code == this.curLotteryCode) {
           return item.is_long_dragon
+        }
+      }
+    },
+    // 加载 loading
+    imgLoaderShow(data) {
+      return function(data) {
+        for(let item of this.imgLoading) {
+          if(item.name == data) {
+            return item.show
+          }
         }
       }
     },
@@ -343,10 +366,13 @@ export default {
       "lotteryData",
       "curLotteryCode",
       "historyTitle",
+      "lotteryType",
       "curLotteryNumbers",
       "screeningParameter",
       "socketOpenResult",
-      "lotteryCodes"
+      "lotteryCodes",
+      "imgLoading",
+      "isNoContent"
     ]),
     showSpecialNumber() {
       //是否显示部分号码（点击查看球号分布、大小分布时启用）
@@ -420,7 +446,7 @@ export default {
   }
 }
 .liangmian{
-  overflow: scroll hidden;
+  // overflow: scroll hidden;
   .loading-img{
     text-align: center;
     img{
@@ -531,6 +557,7 @@ export default {
         background: #555;
       }
     }
+    .no-content{font-size: 20px;color: #666;}
   }
 }
 </style>

@@ -1,19 +1,23 @@
 <template>
-  <div class="loading">
-        <div class="lds-spin">
+  <div >
+        <div >
             <div><div></div></div><div><div></div></div><div><div></div></div><div><div></div></div><div><div></div></div><div><div></div></div><div><div></div></div><div><div></div></div>
+        </div>
+        <div>
+            23
         </div>
   </div>
 </template>
 
 <script>
+import { mapActions } from "vuex";
 export default {
 
   mounted(){
-
+      this.getTest()
   },
   methods:{
-   
+   ...mapActions(['getTest'])
   },
   computed: {
       

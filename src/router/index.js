@@ -10,12 +10,12 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'IndexContainer',
+      // name: 'IndexContainer',
       component: IndexContainer,
       children: [
         {
           path: '/',
-          name: 'Home',
+          // name: 'Home',
           alias: '/index',
           component: Home,
           children: [
@@ -34,6 +34,11 @@ export default new Router({
               name: 'trend',
               path: '/trend',
               component: () => import ('@/components/index/trend'),
+            },
+            {
+              name: 'live',
+              path: '/live',
+              component: () => import ('@/components/index/live'),
             },
             {
               name: 'footerDetails',
@@ -78,14 +83,39 @@ export default new Router({
               component: () => import ('@/components/dataContainer/liveVideo/liveVideo'),
               children: [
                 {
-                  path: 'ssc',
+                  path: 'ssc/:code',
                   name: 'ssc',
                   component: () => import ('@/components/dataContainer/liveVideo/ssc')
                 },
                 {
-                  path: 'pk10',
+                  path: 'pk10/:code',
                   name: 'pk10',
                   component: () => import ('@/components/dataContainer/liveVideo/pk10')
+                },
+                {
+                  path: 'very_happy/:code',
+                  name: 'very_happy',
+                  component: () => import ('@/components/dataContainer/liveVideo/very_happy')
+                },
+                {
+                  path: 'xync/:code',
+                  name: 'xync',
+                  component: () => import ('@/components/dataContainer/liveVideo/xync')
+                },
+                {
+                  path: 'fast3/:code',
+                  name: 'fast3',
+                  component: () => import ('@/components/dataContainer/liveVideo/fast3')
+                },
+                {
+                  path: '11x5/:code',
+                  name: '11x5',
+                  component: () => import ('@/components/dataContainer/liveVideo/11x5')
+                },
+                {
+                  path: 'fc_tc/:code',
+                  name: 'fc_tc',
+                  component: () => import ('@/components/dataContainer/liveVideo/fc_tc')
                 },
               ],
             }
@@ -103,6 +133,16 @@ export default new Router({
       path: '/page404',
       name: 'page404',
       component: () => import ('@/components/base/page404')
+    },
+    {
+      path: '/page408',
+      name: 'page408',
+      component: () => import ('@/components/base/page408')
+    },
+    // test
+    {
+      path: '/test',
+      component: () => import ('@/components/loading'),
     }
   ]
 })

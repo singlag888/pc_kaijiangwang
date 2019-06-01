@@ -17,12 +17,13 @@
                   <b id="qihao" class="col6">{{curReslut.expect}}</b>期
                 </em>
               </span>
-              <span class="getQ">
+              <span class="getQ" v-if="isShowPeriods">
                 全天共
                 <b class="col6" id="total">{{curReslut.today_expect+curReslut.remaining_expect}}</b>期,剩余
                 <b class="col6" id="remain">{{curReslut.remaining_expect}}</b>期
               </span>
-              <time-down :isLastQs="curReslut.remaining_expect" :time="curReslut.next_open_seconds"/>
+              <span style="height: 21px" class="getQ" v-if="!isShowPeriods"></span>
+              <time-down :isLastQs="curReslut.remaining_expect" :time="nextOpenSeconds"/>
             </dd>
             <div class="link">
               <a href="javascript:;" @click="goTo(curReslut.code, '/Data/historyData')">开奖记录</a>
@@ -44,21 +45,30 @@ export default {
     props: ['result'],
     data() {
         return {
-            curReslut: this.result
+            curReslut: this.result,
+            nextOpenSeconds: this.result.next_open_seconds
         };
     },
     computed: {
-        ...mapGetters(['socketOpenResult'])
+        ...mapGetters(['socketOpenResult', 'socketUpdateTime']),
+        // 是否显示当前期数和剩余期数
+        isShowPeriods() {
+          if(this.curReslut.code == 'hk6' || this.curReslut.code == 'fc3d' || this.curReslut.code == 'pl3') {
+            return false
+          } else {
+            return true 
+          }     
+        }
     },
     methods: {
         ...mapActions(['chengecurLotteryCode']),
         goTo(code, path) {
-            this.chengecurLotteryCode(code);
-            this.$router.push(path);
+          this.chengecurLotteryCode(code);
+          this.$router.push(path);
         }
     },
     mounted() {
-        // console.log(this.result)
+
     },
     watch:{
         result() {
@@ -66,9 +76,18 @@ export default {
         },
         socketOpenResult() {
             if(this.socketOpenResult.code == this.curReslut.code){
-                // console.log(this.socketOpenResult)
                 this.curReslut = this.socketOpenResult;
             }
+        },
+        socketUpdateTime() {
+          for(let item of this.socketUpdateTime) {
+              if(item.code == this.curReslut.code) {
+                  this.nextOpenSeconds = item.next_open_seconds
+              }
+          }
+        },
+        curReslut() {
+          this.nextOpenSeconds = this.curReslut.next_open_seconds
         }
     }
 };

@@ -24,7 +24,7 @@
         <tr v-for="(item,index) in forecastOverviewData.list" :key="index">
           <td>{{forecastOverviewData.expert[index].name}}</td>
           <td v-for="(obj,key) in item" :key="key">
-            <span @click="goTo(forecastOverviewData.expert[index].id,index+1,item.forecast_quantity, '/Data/numberPlan')" :title="'查看'+temp.forecast_quantity+'码计划'" v-for="(temp,k) in obj" :key="k">{{temp.forecast_quantity}}码&nbsp;&nbsp;</span>
+            <span @click="goTo(forecastOverviewData.expert[index].id,key+1,temp.forecast_quantity, '/Data/numberPlan')" :title="'查看'+temp.forecast_quantity+'码计划'" v-for="(temp,k) in obj" :key="k">{{temp.forecast_quantity}}码&nbsp;&nbsp;</span>
           </td>
         </tr>
       </table>
@@ -52,7 +52,8 @@ export default {
     ...mapActions(["getforecastOverview"]),
 
     goTo(expertId,location,forecastQuantity,path){
-      this.$router.push({ path: path, query: { expertId: expertId,location:location,forecastQuantity:forecastQuantity } });
+      this.$store.commit('NUMBER_PLAN_PARAMS', { expertId, location, forecastQuantity});
+      this.$router.push({ path: path});
     },
 
     getforecastOverviewFunc(code) {

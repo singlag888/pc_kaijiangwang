@@ -135,6 +135,32 @@ export function goImgUrl(url) {
     return 
   } else {
     window.open(url);
-  }
-  
+  } 
+}
+
+/**
+ * 
+ * @param {是要操作的数值} num 
+ * @param {是要保留几位小数} p 
+ */
+export function keepTwoDecimalFull(num, p) {
+      let result = parseFloat(num);
+      if (isNaN(result)) {
+        // return false  如果不是数字，返回自己
+         return num;
+      }
+      let multiplicator = Math.pow(10, p);
+      result = Math.round(num * multiplicator) / multiplicator;
+
+      let s_x = result.toString();
+      let pos_decimal = s_x.indexOf('.');
+      if (pos_decimal < 0) {
+              pos_decimal = s_x.length;
+              s_x += '.';
+      }
+
+      while (s_x.length <= pos_decimal + p) {
+              s_x += '0';
+      }
+      return s_x;
 }

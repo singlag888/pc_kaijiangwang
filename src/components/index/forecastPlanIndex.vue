@@ -3,7 +3,7 @@
     <ul>
       <li
         v-for="(item,index) in forecastPlanIndexData"
-        @click="goTo(item.code,item.expert_id,item.location,item.forecast_quantity, '/Data/numberPlan')"
+        @click="goTo(item.code, item.expert_id, item.location, item.forecast_quantity)"
         :key="index"
       >
         <div>
@@ -17,7 +17,7 @@
           <img src="../../assets/images/3_05.png" width="60" height="60">
           <i>
             盈利 :
-            <b class="col5">{{item.profit}}</b>
+            <b class="col5">{{Math.round(item.profit)}}</b>
           </i>
         </div>
         <div class="plan_cont plan_three">
@@ -36,6 +36,7 @@
 
 <script>
 import { mapActions } from "vuex";
+
 export default {
   name: "forecastPlanIndex",
   data() {
@@ -49,9 +50,10 @@ export default {
   methods: {
     ...mapActions(["getForecastPlanIndex","chengecurLotteryCode"]),
 
-    goTo(code, expertId, location, forecastQuantity, path) {
-      this.chengecurLotteryCode(code);
-      this.$router.push({ path: path, query: { expertId: expertId,location:location,forecastQuantity:forecastQuantity } });
+    goTo(code, expertId, location, forecastQuantity) {
+      this.chengecurLotteryCode(code) 
+      this.$store.commit('NUMBER_PLAN_PARAMS', { expertId, location, forecastQuantity});
+      this.$router.push({name: 'numberPlan'})   
     },
 
     getForecastPlanIndexFunc() {

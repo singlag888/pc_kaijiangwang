@@ -3,17 +3,17 @@
     <div class="header">
       <div class="headContent pageWidth">
         <div class="logo">
-          <img @click="hanldClick('curLink')" :src="baseSettingData.site_logo" title="logo" alt="logo" >
+          <img @click="hanldClick('curLink')" :src="imgUrl" title="logo" alt="logo" >
         </div>
         <ul class="nav">
           <router-link tag="li" to="/index"><i class="fa fa-home "></i>网站首页</router-link>
           <router-link tag="li" to="/trend"><i class="fas fa-chart-bar"></i>走势图表</router-link>
-          <router-link tag="li" to="/Data/liveVideo"><i class="fas fa-chart-bar"></i>开奖直播</router-link>
+          <router-link tag="li" to="/live"><i class="fas fa-tv"></i>开奖直播</router-link>
           <router-link tag="li" to="/forecastOverview"><i class="fa fa-crosshairs"></i>精准计划</router-link>
           <li @click="hanldClick(baseSettingData.wap_domain)"><i class="fas fa-mobile"></i>手机访问</li>
-          <li @click="hanldClick(baseSettingData.recommend_url)"><i class="fa fa-thumbs-up"></i>本站推荐</li>
-          <li @click="hanldClick(baseSettingData.speed_lottery_url)"><i class="fas fa-external-link-alt"></i>极速系列官网</li>
-          <li @click="hanldClick(baseSettingData.happy_lottery_url)"><i class="fas fa-external-link-alt"></i>欢乐系列官网</li>
+          <!-- <li @click="hanldClick(baseSettingData.recommend_url)"><i class="fa fa-thumbs-up"></i>本站推荐</li> -->
+          <li @click="hanldClick(baseSettingData.speed_lottery_url)"><i class="fas fa-external-link-alt"></i>{{baseSettingData.speed_lottery_title}}</li>
+          <li @click="hanldClick(baseSettingData.happy_lottery_url)"><i class="fas fa-external-link-alt"></i>{{baseSettingData.happy_lottery_title}}</li>
         </ul>
       </div>
     </div>
@@ -28,6 +28,7 @@
 import { mapGetters } from "vuex";
 import VNav from "./VNav";
 import { goImgUrl } from "assets/js/utils";
+import storage from "good-storage";
 
 export default {
   name: "VHeader",
@@ -36,6 +37,11 @@ export default {
     isShowCodeList:{
       type: Boolean,
       default: true
+    }
+  },
+  data() {
+    return {
+
     }
   },
   methods: {
@@ -48,7 +54,14 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(["baseSettingData","lotteryCodes"])
+    ...mapGetters(["baseSettingData","lotteryCodes"]),
+    imgUrl() {
+      if(storage.get('pc_headerImg')) {
+        return storage.get('pc_headerImg')
+      }else {
+        this.baseSettingData.site_logo
+      }
+    }
   },
 };
 </script>

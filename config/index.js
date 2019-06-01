@@ -13,7 +13,9 @@ module.exports = {
     proxyTable: {
       '/': {
         // target: 'https://home-kaijianwang-dev.e2048.com',
-        target: 'https://www-kaijiangwang-dev.e2048.com',
+        // target: 'https://www-kaijiangwang-dev.e2048.com',
+        target: 'https://api.kaijiangwang2-dev.e2048.com',
+        // target: 'https://api.kaijiangwang-gray.e2048.com',
         changeOrigin: true,
         secure: false,
         pathRewrite: {

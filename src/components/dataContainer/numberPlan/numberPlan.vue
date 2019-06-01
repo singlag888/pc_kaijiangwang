@@ -3,7 +3,7 @@
     <div class="title">
       <span
         v-if="planData.location"
-      >{{planData.location[curLocation-1].location_name}}{{curForecastQuantity == 0 ? planData.forecast_quantity_list[0].forecast_quantity : curForecastQuantity}}码定位计划 1天/{{planData.wheel_quantity}}轮 1轮/{{planData.wheel_expect_quantity}}期</span>
+      >{{locationName}}{{curForecastQuantity == 0 ? planData.forecast_quantity_list[0].forecast_quantity : curForecastQuantity}}码定位计划 1天/{{planData.wheel_quantity}}轮 1轮/{{planData.wheel_expect_quantity}}期</span>
       <span v-if="planData.expert_list">
         模拟倍率：
         <input type="text" id="rate" disabled :value="planData.analog_magnification">&nbsp;模拟金额：
@@ -28,22 +28,26 @@
     <div class="tab" v-if="planData.expert_forecast_data_list">
       <div class="left">
         <span
-          @click="selectCurForecastQuantity(item.forecast_quantity)"
-          :class="{'active': curForecastQuantity == item.forecast_quantity}"
+          @click="selectCurForecastQuantity(item)"
+          :class="{'active': curForecastQuantity == item}"
           v-for="(item,index) in planData.forecast_quantity_list"
           :key="index"
-        >{{item.forecast_quantity}}码定位</span>
+        >{{item}}码定位</span>
       </div>
       <div class="right">
         <span
-          :class="{'active':curLocation == item.location}"
+          :class="{'active':locationName == item.location_name}"
           @click="curLocation = item.location"
           v-for="(item,index) in planData.location"
           :key="index"
         >{{item.location_name}}</span>
       </div>
     </div>
-    <div v-if="planData.expert_forecast_data_list.length != 0" class="table" >
+    <div class="loading-img" v-if="imgLoaderShow">
+      <img src="../../../assets/images/Ellipsis-1s-100px.gif" alt="">
+    </div>
+    <div v-if="isNoContent" class="no-content">暂无数据</div>
+    <div v-else class="table" >
       <table
         cellpadding="0"
         cellspacing="0"
@@ -54,9 +58,11 @@
         <tbody>
           <tr>
             <th colspan="11">
-              第{{planData.expert_forecast_data_list.length - index}}轮 待开奖 :
-              {{calcOopenNumToTal(item).noOpen}}
-              中 : {{calcOopenNumToTal(item).win}} 挂 : {{calcOopenNumToTal(item).noWin}} 胜率 : {{calcOopenNumToTal(item).winPro}}
+              第{{planData.expert_forecast_data_list.length - index}}轮 
+              &nbsp;待开奖:{{calcOopenNumToTal(item).noOpen}}
+              &nbsp;中:{{calcOopenNumToTal(item).win}} 
+              &nbsp;挂:{{calcOopenNumToTal(item).noWin}} 
+              &nbsp;胜率:{{calcOopenNumToTal(item).winPro}}
             </th>
           </tr>
           <tr>
@@ -104,16 +110,13 @@
               <font color="green" v-else-if="obj.forecast_numbers.indexOf(obj.open_number) != -1">√赢</font>
               <font color="red" v-else>×输</font>
             </td>
-            <td>{{obj.deadline_win_or_lose}}</td>
-            <td style="color:#bbb">{{obj.back_pressure_win_or_lose}}</td>
+            <td>{{moneyFilter(obj.deadline_win_or_lose, 2)}}</td>
+            <td style="color:#bbb">{{moneyFilter(obj.back_pressure_win_or_lose, 2)}}</td>
             <td>{{obj.single_term_cost}}</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <div v-else class="loading-img">
-      <img src="../../../assets/images/Ellipsis-1s-100px.gif" alt="">
-    </div> 
     <ForecastRanking
       @closeRank="isShowRank=false"
       :isShowRank="isShowRank"
@@ -125,11 +128,12 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import { getCurTime, formatTime } from "@/assets/js/utils";
+import { getCurTime, formatTime, keepTwoDecimalFull } from "@/assets/js/utils";
 import openCode from "@/components/base/openCode/openCode.vue";
 import ForecastRanking from "./forecastRanking";
 export default {
   name: "numberPlan",
+  components: { openCode, ForecastRanking },
   data() {
     return {
       planData: {},
@@ -139,13 +143,10 @@ export default {
       isShowRank: false
     };
   },
-  components: { openCode, ForecastRanking },
   created() {
-    this.curExpertId = this.$route.query.expertId || 0;
-    this.curLocation = this.$route.query.location || 1;
-    let curCode = this.$route.query.code || this.curLotteryCode;
-    this.chengecurLotteryCode(curCode);
-    this.curForecastQuantity = this.$route.query.forecastQuantity || 0;
+    this.curExpertId = this.numberPlanParams.expertId;
+    this.curLocation = this.numberPlanParams.location;
+    this.curForecastQuantity = this.numberPlanParams.forecastQuantity;
     this.getForecastPlanFunc(
       this.curLotteryCode,
       this.curExpertId,
@@ -161,7 +162,7 @@ export default {
     ...mapActions(["getForecastPlan", "chengecurLotteryCode"]),
 
     // 选择位置
-    selectCurForecastQuantity(item,index){
+    selectCurForecastQuantity(item, index){
       this.curForecastQuantity = item
       this.getForecastPlanFunc(
         this.curLotteryCode,
@@ -173,9 +174,14 @@ export default {
     },
 
     // 选择专家
-    curExpertIdChange(){
+    curExpertIdChange() {     
       let val = this.$refs.selectCurExpertId.value;
       this.curExpertId = val;
+      // 选择专家 ID 时判断是否有当前码数 如果没有返回 false 把当前码数改为第一个
+      let flag = this.planData.expert_list[this.curExpertId].forecast_quantity.includes(this.curForecastQuantity)
+      if(flag == false) {
+        this.curForecastQuantity = this.planData.expert_list[this.curExpertId].forecast_quantity[0]
+      }
       this.getForecastPlanFunc(
         this.curLotteryCode,
         this.curExpertId,
@@ -228,24 +234,42 @@ export default {
         location: location || 0
       }).then(res => {
         if (res.code == 200) {
+          // 无数据状态
+          if(res.data == []) {
+            this.$store.commit('IS_NO_CONTENT', true)
+          }else {
+            this.$store.commit('IS_NO_CONTENT', false)
+          }
           this.planData = res.data;
+          this.$store.commit('IMG_LOADING', {name: 'numberPlan', show: false});
           // console.log(this.planData)
         } else {
           //todo
         }
       });
+    },
+    // 金额保留两位小数
+    moneyFilter(data, index) {
+      return keepTwoDecimalFull(data, index)
     }
   },
   computed: {
-    ...mapGetters(["curLotteryCode", "socketOpenResult", "lotteryCodes"]),
-    curCodeInfo() {
-      let codes = {};
-      this.lotteryCodes.forEach(item => {
-        if (item.code == this.curLotteryCode) {
-          codes = item;
+    ...mapGetters(["curLotteryCode", "socketOpenResult", "lotteryCodes", "imgLoading", "isNoContent", "numberPlanParams"]),
+    // 加载 loading
+    imgLoaderShow() {
+      for(let item of this.imgLoading) {
+        if(item.name == 'numberPlan') {
+          return item.show
         }
-      });
-      return codes;
+      }
+    },
+    // 当 location 为 0 时拿到第一个
+    locationName() {
+      if(this.curLocation == 0) {
+        return this.planData.location[0].location_name
+      }else {
+        return this.planData.location[this.curLocation - 1].location_name
+      }
     }
   },
   watch: {
@@ -260,11 +284,10 @@ export default {
         );
       }
     },
-    curLotteryCode: function() {
-      this.curLocation = 1
-      if (this.curCodeInfo.is_forecast_rule == 0) {
-        this.$router.push("./historyData");
-      }
+    numberPlanParams() {
+      this.curExpertId = this.numberPlanParams.expertId
+      this.curLocation = this.numberPlanParams.location
+      this.curForecastQuantity = this.numberPlanParams.forecastQuantity
       this.getForecastPlanFunc(
         this.curLotteryCode,
         this.curExpertId,
@@ -272,27 +295,6 @@ export default {
         this.curForecastQuantity,
         this.curLocation
       );
-    },
-    '$route.query.expertId': {
-        handler(newVal, oldVal) {
-            this.curExpertId = newVal
-            this.getForecastPlanFunc(
-              this.curLotteryCode,
-              this.curExpertId,
-              getCurTime("YYYY-MM-DD"),
-              this.curForecastQuantity,
-              this.curLocation
-            );
-        },
-        deep: true,
-        immediate: true
-    },
-    '$route.query.location': {
-        handler(newVal, oldVal) {
-            this.curLocation = newVal
-        },
-        deep: true,
-        immediate: true
     },
     curLocation() {
       this.getForecastPlanFunc(
@@ -303,24 +305,10 @@ export default {
         this.curLocation
       );
     },
-    '$route.query.forecastQuantity': {
-      handler(newVal, oldVal) {
-        this.curForecastQuantity = newVal
-        this.getForecastPlanFunc(
-          this.curLotteryCode,
-          this.curExpertId,
-          getCurTime("YYYY-MM-DD"),
-          this.curForecastQuantity,
-          this.curLocation
-        );
-      },
-      deep: true,
-      immediate: true
-    },
     planData() {
       // 当 curForecastQuantity 规则为 0 时选中默认第一个
       if(this.curForecastQuantity == 0) {
-        this.curForecastQuantity = this.planData.forecast_quantity_list[0].forecast_quantity
+        this.curForecastQuantity = this.planData.forecast_quantity_list[0]
       }
     }
   }
@@ -443,6 +431,9 @@ export default {
   }
   .loading-img{
     text-align: center
+  }
+  .no-content{
+    text-align: center;font-size: 20px;color: #666;line-height: 50px;
   }
 }
 </style>

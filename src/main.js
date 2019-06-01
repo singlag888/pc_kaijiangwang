@@ -66,6 +66,9 @@ new Vue({
       if(result.type == 'max_forecast_plan'){
         store.commit('SOCKET_PLAN_RESULT', result.data)
       }
+      if(result.type == 'next_open_time') {
+        store.commit('SOCKET_UPDATE_TIME', result.data)
+      }
     }
   }
 })

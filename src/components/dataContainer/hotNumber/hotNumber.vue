@@ -17,9 +17,16 @@
             <th width="400">温</th>
             <th width="345">冷</th>
           </tr>
-          <tr v-if="list.length == 0">
+          <tr v-if="imgLoaderShow">
             <td colspan="10">
-              <img src="../../../assets/images/Ellipsis-1s-100px.gif" alt="">
+              <div>
+                <img src="../../../assets/images/Ellipsis-1s-100px.gif" alt="">
+              </div>
+            </td>
+          </tr>
+          <tr v-if="isNoContent">
+            <td colspan="10">
+              <span class="no-content">暂无数据</span>
             </td>
           </tr>
           <tr v-else v-for="(item,index) in list.rows" :key="index">
@@ -67,30 +74,33 @@ export default {
       this.getColdAndHotNumbers(code).then(res => {
         if (res.code == 200) {
           this.curLength = res.data.rows.length;
+          // 无数据状态
+          if(res.data.rows.length == 0) {
+            this.$store.commit('IS_NO_CONTENT', true)
+          }else {
+            this.$store.commit('IS_NO_CONTENT', false)
+          }
           this.list = res.data;
+          this.$store.commit('IMG_LOADING', {name: 'hotNumber', show: false});
         }
       });
     }
   },
   computed: {
-    ...mapGetters(["curLotteryCode", "socketOpenResult","lotteryCodes"]),
+    ...mapGetters(["curLotteryCode", "socketOpenResult", "lotteryCodes", "imgLoading", "isNoContent"]),
 
-    curCodeInfo() {
-      let codes = {};
-      this.lotteryCodes.forEach(item => {
-        if (item.code == this.curLotteryCode) {
-          codes = item;
+    // 加载 loading
+    imgLoaderShow() {
+      for(let item of this.imgLoading) {
+        if(item.name == 'hotNumber') {
+          return item.show
         }
-      });
-      return codes;
+      }
     }
     
   },
   watch: {
     curLotteryCode: function() {
-      if (this.curCodeInfo.is_cold_and_hot_number == 0) {
-        this.$router.push("./historyData");
-      }
       this.getColdAndHotNumbersFunc(this.curLotteryCode);
     },
     socketOpenResult: function() {
@@ -144,6 +154,9 @@ export default {
       th {
         padding: 6px 0;
       }
+    }
+    .no-content{
+      font-size: 20px;color: #666;
     }
   }
 }

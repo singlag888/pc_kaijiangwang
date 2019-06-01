@@ -20,6 +20,8 @@
 
 <script>
 import { formatTimerCallback } from "assets/js/utils";
+import { mapGetters } from 'vuex'
+
 export default {
   name: "timeDown",
   props: {
@@ -83,6 +85,9 @@ export default {
       }
     }
   },
+  computed: {
+    ...mapGetters(['socketOpenResult']),
+  },
   watch: {
     time() {
       this.timeDown();
@@ -93,7 +98,16 @@ export default {
       if (this.isLastQs <= 0) {
         this.$emit("callBackFunc", false);
       }
-    }
+    },
+    curTimeNum() {
+      if(this.curTimeNum <= 0) {
+        this.isOpening = true
+        this.$emit("callBackFunc", this.isOpening);
+      }else {
+        this.isOpening = false
+        this.$emit("callBackFunc", this.isOpening);
+      }
+    },
   }
 };
 </script>

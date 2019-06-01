@@ -1,144 +1,150 @@
 <template>
   <div class="trendContainer pageWidth">
     <div class="data">
-      <div class="title">
-        <div class="filterTop">
-          <a href="jacascript:void(0)" class="active">
-            <i class="ico1"></i>基本走势图
-          </a>
-          <!-- <a href="jacascript:void(0)">
-            <i class="ico2"></i>同期走势图
-          </a>-->
-          <div class="filterTime">
-            <span slot="afterDateInput" class="animated-placeholder">按日期</span>
-            <datepicker
-              class="datepicker"
-              :input-class="'datepickerInput'"
-              :format="dateOption.format"
-              :language="dateOption.language"
-              v-model="curSelectTime"
-              @closed="selectedTime"
-            ></datepicker>
+      <div v-if="isNoContent" class="no-content">
+        暂无数据
+      </div>
+      <div v-else>
+        <div class="title">
+          <div class="filterTop">
+            <a href="jacascript:void(0)" class="active">
+              <i class="ico1"></i>基本走势图
+            </a>
+            <!-- <a href="jacascript:void(0)">
+              <i class="ico2"></i>同期走势图
+            </a>-->
+            <div class="filterTime">
+              <span slot="afterDateInput" class="animated-placeholder">按日期</span>
+              <datepicker
+                class="datepicker"
+                :input-class="'datepickerInput'"
+                :format="dateOption.format"
+                :language="dateOption.language"
+                v-model="curSelectTime"
+                @closed="selectedTime"
+              ></datepicker>
+            </div>
+          </div>
+          <div class="filterDown">
+            <ul class="trendTab">
+              <!-- @click="changeTrendTab(1)" -->
+              <li :class="{'active':curTrendTabIndex==1}">位置走势图</li>
+              <!-- <li @click="changeTrendTab(2)" :class="{'active':curTrendTabIndex==2}">号码走势图</li> -->
+              <!-- <li @click="changeTrendTab(3)" :class="{'active':curTrendTabIndex==3}">冠亚和走势图</li> -->
+            </ul>
+            <ul class="numTab">
+              <li
+                @click="changeNumTab(index)"
+                v-for="(item,index) in  basicTrend.location_names"
+                :key="index"
+                :class="{'active':curNumTabIndex == index}"
+              >{{item}}</li>
+            </ul>
+          </div>
+        </div>            
+        <div class="content">        
+          <div class="table">
+            <table>
+              <tr>
+                <th width="110" rowspan="2">统计类型</th>
+                <template
+                  v-for="(item,index) in basicTrend && filterData(basicTrend)"
+                >
+                  <th
+                    :colspan="item.len"
+                    v-if="item.type == 'open_numbers'"
+                    :key="index+'_key1_'"
+                  >{{basicTrend.location_names[curNumTabIndex]}}</th>
+                  <th :colspan="item.len" v-else :key="index">{{item.type_name}}</th>
+                </template>
+              </tr>
+              <tr>
+                <th
+                  width="60"
+                  v-for="(item,index) in basicTrend.total"
+                  :key="index+'_key2_'"
+                >{{item.result}}</th>
+              </tr>
+              <tr>
+                <td>总次数</td>
+                <td
+                  width="60"
+                  v-for="(item,index) in basicTrend.total"
+                  :key="index+'_key3_'"
+                >{{item.count}}</td>
+              </tr>
+              <tr>
+                <td>最大遗漏</td>
+                <td
+                  width="60"
+                  v-for="(item,index) in basicTrend.total"
+                  :key="index+'_key4_'"
+                >{{item.max_missing}}</td>
+              </tr>
+            </table>
+          </div>
+          <div class="table">
+            <table ref="Table">
+              <tr>
+                <th width="110" rowspan="2">期号</th>
+                <template
+                  v-for="(item,index) in basicTrend && filterData(basicTrend)"
+                >
+                  <th
+                    :colspan="item.len"
+                    v-if="item.type == 'open_numbers'"
+                    :key="index+'_key5_'"
+                  >{{basicTrend.location_names[curNumTabIndex]}}走势</th>
+                  <th :colspan="item.len" v-else :key="index+'_key5_'">{{item.type_name}}</th>
+                </template>
+              </tr>
+              <tr>
+                <th
+                  width="60"
+                  v-for="(item,index) in basicTrend.total"
+                  :key="index+'_key6_'"
+                >{{item.result}}</th>
+              </tr>
+              <tr
+                v-for="(item,index) in basicTrend.details"
+                :key="index+'_key7_'"
+              >
+                <td>{{item[0].expect}}</td>
+                <template v-for="(obj,key) in item">
+                  <td width="60" :key="num+'_key8_'+key" v-for="(ball,num) in obj.row">
+                    <span
+                      v-if="ball == 0 && obj.type == 'open_numbers'"
+                      class="win"
+                      :key="num+ball+'_key9_'"
+                    >{{num+1}}</span>
+                    <span
+                      v-else-if="ball == 0 && obj.type == 'back_swing'"
+                      class="blue"
+                      :key="num+ball+'_key9_'"
+                    >{{canvertBallToTxt(obj.type,num)}}</span>
+                    <span
+                      v-else-if="ball == 0 && obj.type == 'single_double'"
+                      class="orange"
+                      :key="num+ball+'_key9_'"
+                    >{{canvertBallToTxt(obj.type,num)}}</span>
+                    <span
+                      v-else-if="ball == 0 && obj.type == 'big_small'"
+                      class="green"
+                      :key="num+ball+'_key9_'"
+                    >{{canvertBallToTxt(obj.type,num)}}</span>
+                    <span v-else :key="num+key+'_key9_'">{{ball}}</span>
+                  </td>
+                </template>
+              </tr>
+            </table>
+            <div class="canvasBox">
+              <canvas ref="canvas"></canvas>
+            </div>
           </div>
         </div>
-        <div class="filterDown">
-          <ul class="trendTab">
-            <li @click="changeTrendTab(1)" :class="{'active':curTrendTabIndex==1}">位置走势图</li>
-            <!-- <li @click="changeTrendTab(2)" :class="{'active':curTrendTabIndex==2}">号码走势图</li> -->
-            <!-- <li @click="changeTrendTab(3)" :class="{'active':curTrendTabIndex==3}">冠亚和走势图</li> -->
-          </ul>
-          <ul class="numTab">
-            <li
-              @click="changeNumTab(index)"
-              v-for="(item,index) in  locationNames"
-              :key="index"
-              :class="{'active':curNumTabIndex==index}"
-            >{{item}}</li>
-          </ul>
-        </div>
-      </div>
-      <div v-if="basicTrend.length == 0" class="loading-img">
-        <img src="../../../assets/images/Ellipsis-1s-100px.gif" alt="">
-      </div>
-      <div v-else class="content">        
-        <div class="table">
-          <table>
-            <tr>
-              <th width="110" rowspan="2">统计类型</th>
-              <template
-                v-for="(item,index) in basicTrend[curNumTabIndex] && filterData(basicTrend[curNumTabIndex])"
-              >
-                <th
-                  :colspan="item.len"
-                  v-if="item.type == 1"
-                  :key="index+'_key1_'"
-                >{{locationNames[curNumTabIndex]}}</th>
-                <th :colspan="item.len" v-else :key="index">{{item.type_name}}</th>
-              </template>
-            </tr>
-            <tr>
-              <th
-                width="60"
-                v-for="(item,index) in basicTrend[curNumTabIndex] && basicTrend[curNumTabIndex].list"
-                :key="index+'_key2_'"
-              >{{item.title}}</th>
-            </tr>
-            <tr>
-              <td>总次数</td>
-              <td
-                width="60"
-                v-for="(item,index) in basicTrend[curNumTabIndex] && basicTrend[curNumTabIndex].list"
-                :key="index+'_key3_'"
-              >{{item.count}}</td>
-            </tr>
-            <tr>
-              <td>最大遗漏</td>
-              <td
-                width="60"
-                v-for="(item,index) in basicTrend[curNumTabIndex] && basicTrend[curNumTabIndex].list"
-                :key="index+'_key4_'"
-              >{{item.max_missing}}</td>
-            </tr>
-          </table>
-        </div>
-        <div class="table">
-          <table ref="Table">
-            <tr>
-              <th width="110" rowspan="2">期号</th>
-              <template
-                v-for="(item,index) in basicTrend[curNumTabIndex] && filterData(basicTrend[curNumTabIndex])"
-              >
-                <th
-                  :colspan="item.len"
-                  v-if="item.type == 1"
-                  :key="index+'_key5_'"
-                >{{locationNames[curNumTabIndex]}}走势</th>
-                <th :colspan="item.len" v-else :key="index+'_key5_'">{{item.type_name}}</th>
-              </template>
-            </tr>
-            <tr>
-              <th
-                width="60"
-                v-for="(item,index) in basicTrend[curNumTabIndex] && basicTrend[curNumTabIndex].list"
-                :key="index+'_key6_'"
-              >{{item.title}}</th>
-            </tr>
-            <tr
-              v-for="(item,index) in trendList && trendList[curNumTabIndex]"
-              :key="index+'_key7_'"
-            >
-              <td>{{item[0].expect}}</td>
-              <template v-for="(obj,key) in item">
-                <td width="60" :key="num+'_key8_'+key" v-for="(ball,num) in obj.row">
-                  <span
-                    v-if="ball == 0 && obj.type == 'location_trend'"
-                    class="win"
-                    :key="num+ball+'_key9_'"
-                  >{{num+1}}</span>
-                  <span
-                    v-else-if="ball == 0 && obj.type == 'back_swing_trend'"
-                    class="blue"
-                    :key="num+ball+'_key9_'"
-                  >{{canvertBallToTxt(obj.type,num)}}</span>
-                  <span
-                    v-else-if="ball == 0 && obj.type == 'single_double_trend'"
-                    class="orange"
-                    :key="num+ball+'_key9_'"
-                  >{{canvertBallToTxt(obj.type,num)}}</span>
-                  <span
-                    v-else-if="ball == 0 && obj.type == 'big_small_trend'"
-                    class="green"
-                    :key="num+ball+'_key9_'"
-                  >{{canvertBallToTxt(obj.type,num)}}</span>
-                  <span v-else :key="num+key+'_key9_'">{{ball}}</span>
-                </td>
-              </template>
-            </tr>
-          </table>
-          <div class="canvasBox">
-            <canvas ref="canvas"></canvas>
-          </div>
-        </div>
+        <div class="loading-img" v-if="imgLoaderShow">
+          <img src="../../../assets/images/Ellipsis-1s-100px.gif" alt="">
+        </div> 
       </div>
     </div>
   </div>
@@ -157,7 +163,7 @@ export default {
       selectedGroup: 0, //选中的组
       selectedCode: 0, //选中的彩种
       selectedNum: 0, //选中的号码
-      trendList: [], //走势图数据
+      basicTrend: {}, //走势图数据
       curSelectTime: new Date(),
       dateOption: {
         language: zh,
@@ -173,27 +179,28 @@ export default {
   mounted() {
     this.$nextTick(() => {
       // 获取基础统计
-      this.getBasicTrend({
-        code: this.curLotteryCode,
-        open_date: getCurTime("YYYY-MM-DD")
-      });
-      this.getBasicTrendEveryPeriodFunc(
-        getCurTime("YYYY-MM-DD"),
-        this.curLotteryCode
-      );
+      this.getBasicTrendFunc(this.curLotteryCode, getCurTime("YYYY-MM-DD"), this.curNumTabIndex);
     });
   },
   methods: {
-    ...mapActions(["getBasicTrendEveryPeriod", "getBasicTrend"]),
+    ...mapActions(["getBasicTrend"]),
 
-    // 获取走势数据
-    getBasicTrendEveryPeriodFunc(date, code) {
-      this.getBasicTrendEveryPeriod({
-        open_date: date,
-        code: code
+    getBasicTrendFunc(code, date, location) {
+      this.basicTrend = {}
+      this.getBasicTrend({
+        code: code,
+        open_date: date,    
+        location: location
       }).then(res => {
         if (res.code == 200) {
-          this.trendList = res.data;
+          // 无数据状态
+          if(res.data.details.length == 0) {
+            this.$store.commit('IS_NO_CONTENT', true)
+          }else {
+            this.$store.commit('IS_NO_CONTENT', false)
+          }
+          this.basicTrend = res.data;
+          this.$store.commit('IMG_LOADING', {name: 'basicTrend', show: false})
           setTimeout(() => {
             this.drawTrend();
           }, 30);
@@ -208,13 +215,13 @@ export default {
       let singleTxt = ["单", "双"];
       let bigTxt = ["大", "小"];
       switch (type) {
-        case "back_swing_trend":
+        case "back_swing":
           txt = backTxt[index];
           break;
-        case "single_double_trend":
+        case "single_double":
           txt = singleTxt[index];
           break;
-        case "big_small_trend":
+        case "big_small":
           txt = bigTxt[index];
           break;
       }
@@ -225,16 +232,16 @@ export default {
     ballStyle(item) {
       let sty = "";
       switch (item.type) {
-        case "location_trend":
+        case "open_numbers":
           sty = "win";
           break;
-        case "back_swing_trend":
+        case "back_swing":
           sty = "blue";
           break;
-        case "single_double_trend":
+        case "single_double":
           sty = "orange";
           break;
-        case "big_small_trend":
+        case "big_small":
           sty = "green";
           break;
       }
@@ -243,7 +250,7 @@ export default {
 
     // 转换数据过滤相同数据
     filterData(list) {
-      let data = list && list.list;
+      let data = list && list.total;
       let obj = {};
       let arr =
         data &&
@@ -268,14 +275,7 @@ export default {
 
     // 选择日期
     selectedTime() {
-      this.getBasicTrend({
-        code: this.curLotteryCode,
-        open_date: formatTime(this.curSelectTime, "YYYY-MM-DD")
-      });
-      this.getBasicTrendEveryPeriodFunc(
-        formatTime(this.curSelectTime, "YYYY-MM-DD"),
-        this.curLotteryCode
-      );
+      this.getBasicTrendFunc(this.curLotteryCode, formatTime(this.curSelectTime, "YYYY-MM-DD"), this.curNumTabIndex);
     },
 
     // 绘制走势
@@ -286,8 +286,9 @@ export default {
         y2 = 0;
       let canvas = this.createCanvas(this.$refs.canvas);
       //获取位数
-      let trendLineNum =
-        this.trendList && this.trendList[this.curNumTabIndex].length - 1;
+      if(this.basicTrend.details) {
+        let trendLineNum = this.basicTrend.details.length - 1;
+      }   
       var trendBallList = document.querySelectorAll(".win");
       if (trendBallList.length <= 1) return;
       // for (var a = 0; a <= trendLineNum; a++) {
@@ -335,17 +336,17 @@ export default {
     },
 
     // 切换走势图
-    changeTrendTab(index) {
-      this.curTrendTabIndex = index;
-    },
+    // changeTrendTab(index) {
+    //   this.curTrendTabIndex = index;
+    // },
 
     // 切换号码
     changeNumTab(index) {
       this.curNumTabIndex = index;
+      this.getBasicTrendFunc(this.curLotteryCode, getCurTime("YYYY-MM-DD"), this.curNumTabIndex);
       setTimeout(() => {
         this.drawTrend();
       }, 20);
-      // console.log(this.curNumTabIndex);
     },
 
     changeGroup(g) {
@@ -361,56 +362,30 @@ export default {
   },
   computed: {
     ...mapGetters([
-      "lotteryCodes",
-      "basicTrend",
       "curLotteryCode",
-      "socketOpenResult"
+      "socketOpenResult",
+      "imgLoading",
+      "isNoContent"
     ]),
-
-    curCodeInfo() {
-      let codes = {};
-      this.lotteryCodes.forEach(item => {
-        if (item.code == this.curLotteryCode) {
-          codes = item;
+    // 加载 loading
+    imgLoaderShow() {
+      for(let item of this.imgLoading) {
+        if(item.name == 'basicTrend') {
+          return item.show
         }
-      });
-      return codes;
+      }
     }
   },
   watch: {
     curLotteryCode: function() {
-      if (this.curCodeInfo.is_trend_chart == 0) {
-        this.$router.push("./historyData");
-      }
-      this.getBasicTrend({
-        code: this.curLotteryCode,
-        open_date: getCurTime("YYYY-MM-DD")
-      });
-      this.getBasicTrendEveryPeriodFunc(
-        getCurTime("YYYY-MM-DD"),
-        this.curLotteryCode
-      );
-    },
-    basicTrend: function() {
-      // console.log(this.basicTrend)
-      this.locationNames = [];
-      this.basicTrend.forEach(item => {
-        this.locationNames.push(item.location_name);
-      });
+      this.getBasicTrendFunc(this.curLotteryCode, getCurTime("YYYY-MM-DD"), this.curNumTabIndex);
     },
     socketOpenResult: function() {
       if (
         this.socketOpenResult.code == this.curLotteryCode &&
         getCurTime("YYYY-MM-DD") == formatTime(this.curSelectTime, "YYYY-MM-DD")
       ) {
-        this.getBasicTrend({
-          code: this.curLotteryCode,
-          open_date: getCurTime("YYYY-MM-DD")
-        });
-        this.getBasicTrendEveryPeriodFunc(
-          getCurTime("YYYY-MM-DD"),
-          this.curLotteryCode
-        );
+        this.getBasicTrendFunc(this.curLotteryCode, getCurTime("YYYY-MM-DD"), this.curNumTabIndex);
       }
     }
   }
@@ -552,6 +527,9 @@ export default {
   }
   .loading-img{
     text-align: center
+  }
+  .no-content{
+    text-align: center;font-size: 20px;color: #666;line-height: 50px;
   }
   .content {
     margin-top: 20px;
