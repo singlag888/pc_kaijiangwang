@@ -1,6 +1,6 @@
 <template>
 <div>
-    <div v-for="(item,index) in baseSettingData.single_page" :key="index" class="articleDetails" >
+    <!-- <div v-for="(item,index) in baseSettingData.single_page" :key="index" class="articleDetails" >
         <div v-if="identification == item.identification">
             <div class="title">
                 <h1>{{item.title}}</h1>
@@ -8,7 +8,7 @@
             </div>
             <div v-html="item.content" class="content"></div>
         </div>
-    </div>
+    </div> -->
 </div>
   
 </template>
@@ -23,7 +23,7 @@ export default {
     };
   },
   computed:{
-    ...mapGetters(["baseSettingData"])
+    // ...mapGetters(["baseSettingData"])
   },
   watch: {
 

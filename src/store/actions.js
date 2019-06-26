@@ -58,9 +58,7 @@ export const getLotteryData = ({
   commit,
   state
 }, params) => {
-  // 清空数据显示loading
-  commit(types.LOTTERY_DATA, []);
-  commit(types.IMG_LOADING, {name: 'historyData', show: true});
+  commit(types.LOTTERY_DATAS, []);
   return api.getLotteryData(params).then((res) => {
     if (res.code == 200) {
       // 无数据状态
@@ -71,15 +69,22 @@ export const getLotteryData = ({
       }
       // 保存基础数据
       commit(types.LOTTERY_DATA, res.data && res.data.rows);
+      // 保存历史数据 code
+      commit(types.LOTTERY_CODE, res.data && res.data.code);
       // 保存历史数据 code_type
       commit(types.LOTTERY_TYPE, res.data && res.data.code_type);
       // 保存历史开奖title
       commit(types.HISTORY_TITLE, res.data && res.data.history_data_fields);
-      // 保存当前彩种所有球号
-      commit(types.CUR_LOTTERY_NUMBERS, res.data && res.data.lottery_numbers);
       // 保存当前彩种大小单双分布
-      commit(types.SCREENING_PARAMETER, res.data && res.data.screeningParameter);
-      commit(types.IMG_LOADING, {name: 'historyData', show: false});
+      commit(types.SCREENING_PARAMETER, res.data && res.data.screening_parameter);
+      // 判断如果有数据就加载 获取基础数据--中间信息     
+      if(res.data.rows.length > 0) {
+        api.getLotteryDatas(params).then((res) => {
+          if(res.code == 200) {
+            commit(types.LOTTERY_DATAS, res.data.rows);
+          }
+        })
+      }
     } else {
       //console.log(res)
     }
@@ -110,7 +115,6 @@ export const getSidesTotal = ({
   commit,
   state
 }, params) => {
-  commit(types.IMG_LOADING, {name: 'sidesTotal', show: true});
   return api.getSidesTotal(params);
 }
 
@@ -119,14 +123,11 @@ export const getLongDragon = ({
   commit,
   state
 }, params) => {
-  // 清空数据显示loading
   commit(types.SAVE_CHANGLONG_DATA, []);
-  commit(types.IMG_LOADING, {name: 'dragonData', show: true});
   return api.getLongDragon(params).then((res) => {
     if (res.code == 200) {
       // todo
       commit(types.SAVE_CHANGLONG_DATA, res.data);
-      commit(types.IMG_LOADING, {name: 'dragonData', show: false});
     } else {
       //console.log(res)
     }
@@ -140,27 +141,8 @@ export const getBasicTrend = ({
   commit,
   state
 }, params) => {
-  commit(types.IMG_LOADING, {name: 'basicTrend', show: true});
   return api.getBasicTrend(params)
 }
-
-// 获取文章分类
-export const getArticleCategory = ({
-  commit,
-  state
-}, params) => {
-  return api.getArticleCategory(params).then((res) => {
-    if (res.code == 200) {
-      commit(types.ARTICLE_CATEGORY, res.data);
-    } else {
-      //console.log(res)
-    }
-  }).catch(e => {
-    //console.log(e)
-  });
-}
-
-
 
 // 广告列表
 export const getAdvertisement = ({
@@ -169,7 +151,6 @@ export const getAdvertisement = ({
 }, params) => {
   return new Promise((resove, reject) => {
     api.getAdvertisement(params).then((res) => {
-      resove(res);
       if (res.code == 200) {
         commit(types.AD_LIST,res.data);
       } else {
@@ -191,6 +172,10 @@ export const getLotteryCodes = ({
   return api.getLotteryCodes(params).then((res) => {
     if (res.code == 200) {
       commit(types.LOTTERY_CODES, res.data);
+      if(storage.get('PC_CUR_LOTTERY_CODE') == undefined || storage.get('PC_CUR_LOTTERY_TYPE') == undefined) {
+        commit('CUR_LOTTERY_CODE', res.data[0].code);
+        commit('CUR_LOTTERY_TYPE', res.data[0].code_type);
+      }
       //console.log(res)
     } else {
       //console.log(res)
@@ -205,7 +190,6 @@ export const getGlassBeadTrend = ({
   commit,
   state
 }, params) => {
-  commit(types.IMG_LOADING, {name: 'louZhu', show: true});
   return api.getGlassBeadTrend(params);
 }
 
@@ -228,16 +212,24 @@ export const getSetting = ({
 }) => {
   api.getSetting().then(res => {
     if (res.code == 200) {
-      document.title = res.data.site_title;
-      document.querySelector('#favicon').setAttribute('href',res.data.site_favicon);
-      commit(types.BASE_SETTING_DATA, res.data);
-      if(storage.get('pc_headerImg') == '') {
-        storage.set('pc_headerImg', state.baseSettingData.site_logo)
+      document.title = res.data.base.site_title;
+      document.querySelector('#favicon').setAttribute('href',res.data.base.site_favicon);
+      // base
+      commit(types.BASE_SETTING_BASE, res.data.base);
+      // lottery_data
+      commit(types.BASE_SETTING_LOTTERYDATA, res.data.lottery_data);
+      // sys
+      commit(types.BASE_SETTING_SYS, res.data.sys);
+      // upload
+      commit(types.BASE_SETTING_UPLOAD, res.data.upload);
+      // logo 存入 storage
+      if(storage.get('pc_headerImg') == undefined) {
+        storage.set('pc_headerImg', res.data.base.site_logo)
       }else {
-        if(storage.get('pc_headerImg') == state.baseSettingData.site_logo) {
+        if(storage.get('pc_headerImg') == res.data.base.site_logo) {
           return
         } else {
-          storage.set('pc_headerImg', state.baseSettingData.site_logo)
+          storage.set('pc_headerImg', res.data.base.site_logo)
         }
       }
     } else {
@@ -251,7 +243,6 @@ export const getColdAndHotNumbers = ({
   commit,
   state
 }, code) => {
-  commit(types.IMG_LOADING, {name: 'hotNumber', show: true});
   return api.getColdAndHotNumbers(code);
 }
 
@@ -260,7 +251,6 @@ export const getForecastPlan = ({
   commit,
   state
 }, params) => {
-  commit(types.IMG_LOADING, {name: 'numberPlan', show: true});
   return api.getForecastPlan(params);
 }
 
@@ -277,6 +267,7 @@ export const getforecastOverview = ({
   commit,
   state
 }, code) => {
+  commit(types.IMG_LOADING, {name: 'preciseNumberPlan', show: true});
   return api.getforecastOverview(code);
 }
 

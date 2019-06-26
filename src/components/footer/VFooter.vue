@@ -4,7 +4,7 @@
       <li>声明：本网资讯仅供彩票爱好者浏览、购买彩票参考之用。任何人不得用于非法用途，否则责任自负。</li>
       <li>本网所登载广告均为广告客户的个人意见及表达方式，和本网无任何关系。</li>
       <li>
-        {{baseSettingData.site_icp}}
+        {{baseSettingBase.site_icp}}
       </li>
     </ul>
   </div>
@@ -41,7 +41,7 @@ export default {
     // }
   },
   computed: {
-    ...mapGetters(["baseSettingData"])
+    ...mapGetters(["baseSettingBase"])
   },
   watch: {
     // "baseSettingData.site_statis"() {

@@ -29,8 +29,19 @@ export function getLotteryData(params) {
         page_size: params.page_size || 10000,
         page: params.page || 1,
         code: params.code,
+        is_phone: params.is_phone || 0
     });   
     return axios.get(urls.getLotteryDataAPI(), param);
+}
+//  获取基础数据--中间信息
+export function getLotteryDatas(params) {
+    let param = Object.assign({}, {
+        code: params.code,
+        open_date: params.open_date,
+        page: params.page || 1,
+        page_size: params.page_size || 10000,       
+    });   
+    return axios.get(urls.getLotteryDatasAPI(), param);
 }
 
 //  获取文章列表
@@ -73,15 +84,6 @@ export function getBasicTrend(params) {
         location: params.location
     });
     return axios.get(urls.getBasicTrendAPI(), param);
-}
-
-//  获取文章分类
-export function getArticleCategory(params) {
-    let param = Object.assign({}, {
-        page: params && params.page || 1,
-        page_size: params && params.page_size || 100,
-    });
-    return axios.get(urls.getArticleCategoryAPI(), param);
 }
 
 //  广告分组

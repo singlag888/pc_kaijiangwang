@@ -39,60 +39,39 @@
     </div>
     <div class="liangmian" v-show="isShowSidesTotal">   
       <div v-if="isSidesTotal == 1">
-        <div class="loading-img" v-if="imgLoaderShow('sidesTotal')">
-          <img src="../../../assets/images/Ellipsis-1s-100px.gif" alt="">
-        </div>
-        <div v-if="sidesTotal.length == 0"></div>
-        <table v-else class="liangmianTable" border="1">
-          <tr>
-            <td
-              v-for="(thData, index) in sidesTotal && filterData(sidesTotal)"
-              :key="index+'_a_'+thData.location_name"
-              :colspan="thData.len"
-            >{{thData.location_name}}</td>
-          </tr>
-          <tr>
-            <template v-for="(data, index) in sidesTotal && filterData(sidesTotal)">
-              <td
-                v-show="data.location == item.location"
-                v-for="(item, key) in sidesTotal"
-                :key="index+key+'_b_'+data.location"
-              >{{item.result}}</td>
-            </template>
-          </tr>
-          <tr>
-            <template v-for="(data, index) in sidesTotal && filterData(sidesTotal)">
-              <td
-                v-show="data.location == item.location"
-                v-for="(item, key) in sidesTotal"
-                :key="index +' '+ key+'_c_'"
-              >{{item.count}}</td>
-            </template>
-          </tr>
-        </table>
-      </div>
+        <ul class="item-box">
+          <li v-for="(item, index) in locationName" :key="index">{{item}}</li>         
+        </ul>
+        <ul class="item-box-list">
+          <li v-for="(item, index) in locationName" :key="index">
+            <span v-for="(obj, key) in sidesTotalField" :key="key">{{obj}}</span>
+          </li>
+        </ul>
+        <ul class="item-box-list">
+          <li v-for="(item, index) in locationName" :key="index">
+            <span v-for="(obj,key) in sidesTotal" :key="key" v-if="key >= (sidesTotalField.length * index) && key < (sidesTotalField.length * (index+1)) ">{{obj}}</span>
+          </li>
+        </ul>
+     </div>
     </div>
     <div class="changlong" v-show="isShowLongDragon">
       <div v-if="isLongDragon == 1">
-        <div class="loading-img" v-if="imgLoaderShow('dragonData')">
-          <img src="../../../assets/images/Ellipsis-1s-100px.gif" alt="">
-        </div> 
-        <div v-if="dragonData.length == 0"></div>
-        <table v-else class="changlongTable" cellpadding="0" cellspacing="0">
+        <table class="changlongTable" cellpadding="0" cellspacing="0">
           <th colspan="12">长龙连开提醒</th>
           <tr>
-            <td>
+            <td v-if="dragonData.length > 0">
               <span
                 v-for="(data, index) in dragonData"
                 :key="index+'_d'"
-              >{{data.location_name}}:{{data.result}} {{data.continuous}} 期</span>
+              >{{data.location_name}}</span>
             </td>
+            <td v-else style="height:40px"></td>
           </tr>
         </table>
       </div>
     </div>
     <div class="dataTabs">
-      <div class="numBtn" v-show="curLotteryNumbers.length>0">
+      <div class="numBtn">
         <div class="text">查看球号分布</div>
         <div class="btns">
           <a
@@ -144,38 +123,32 @@
             <template v-show="!Array.isArray(item)">{{item.type_name}}</template>
           </td>
         </tr>
-        <tr v-if="imgLoaderShow('historyData')">
-          <td colspan="10">
-            <div>
-              <img src="../../../assets/images/Ellipsis-1s-100px.gif" alt="">
-            </div>
-          </td>               
-        </tr>
-        <tr v-if="isNoContent">
+        <!-- <tr v-if="isNoContent">
           <td colspan="10">
             <span class="no-content">暂无数据</span>
           </td>               
-        </tr>
-        <tr v-else v-for="(item, index) in lotteryData" :key="index+'_t'">
+        </tr> -->
+        <tr v-for="(item, index) in lotteryData" :key="index+'_t'">
           <td class="time">{{item.expect}} {{item.open_datetime.split(' ')[1]}}</td>
-          <td class="nums" v-if="item.data[selectedTableShowData].length > 0">
+          <td class="nums" v-if="lotteryDatas.length > 0">
             <openCode
               :doubleNumber="doubleNumberCount(index)"
               :showSpecialNumber="showSpecialNumber"
               :selectedOpenNumber="selectedOpenNumber"
               :selectedNumberType="selectedNumberType"
               :selectedTableShowData="selectedTableShowData"
-              :allResult="item.data"
-              :code="item.code"
+              :allResult="lotteryDatas[index]"
+              :code="lotteryCode"
               :codeType="lotteryType"
-              :result="item.data[selectedTableShowData]"
+              :result="lotteryDatas[index][selectedTableShowData]"
             />
           </td>
+          <td class="nums" v-else></td>
           <template v-for="(obj,key) in historyTitle">
             <template v-if="!Array.isArray(item)">
               <td
                 class="guanyahe"
-                v-for="(gyh, index) in item.data[obj.type]"
+                v-for="(gyh, index) in item[obj.type]"
                 :key="'a' + index + key"
               >{{gyh}}</td>
             </template>
@@ -191,6 +164,7 @@ import { getCurTime, formatTime } from "@/assets/js/utils";
 import Datepicker from "vuejs-datepicker";
 import { zh } from "vuejs-datepicker/dist/locale";
 import openCode from "@/components/base/openCode/openCode.vue";
+
 export default {
   name: "historyData",
   components: { openCode, Datepicker },
@@ -211,7 +185,6 @@ export default {
   },
   mounted() {
     setTimeout(() => {
-      this.getLongDragon({ code: this.curLotteryCode });
       this.selectedTime();
     }, 20);
   },
@@ -221,26 +194,22 @@ export default {
         open_date: formatTime(this.curSelectTime, "YYYY-MM-DD"),
         code: this.curLotteryCode
       });
-      this.getLongDragon({ code: this.curLotteryCode });
-      this.getSidesTotalFunc(
-        this.curLotteryCode,
-        formatTime(this.curSelectTime, "YYYY-MM-DD")
-      );
     },
     socketOpenResult: function() {
-      if (
-        this.socketOpenResult.code == this.curLotteryCode &&
-        formatTime(this.curSelectTime, "YYYY-MM-DD") == getCurTime("YYYY-MM-DD")
-      ) {
+      if(this.socketOpenResult.code == this.curLotteryCode && formatTime(this.curSelectTime, "YYYY-MM-DD") == getCurTime("YYYY-MM-DD")) {
         this.getLotteryData({
           open_date: formatTime(this.curSelectTime, "YYYY-MM-DD"),
           code: this.curLotteryCode
         });
-        this.getLongDragon({ code: this.curLotteryCode });
-        this.getSidesTotalFunc(
-          this.curLotteryCode,
-          formatTime(this.curSelectTime, "YYYY-MM-DD")
-        );
+        if(this.isLongDragon == 1) {
+          this.getLongDragon({ code: this.curLotteryCode });
+        }
+        if(this.isSidesTotal == 1) {
+          this.getSidesTotalFunc(
+            this.curLotteryCode,
+            formatTime(this.curSelectTime, "YYYY-MM-DD")
+          );
+        }
       }
     }
   },
@@ -248,31 +217,31 @@ export default {
     ...mapActions(["getLotteryData", "getLongDragon", "getSidesTotal"]),
 
     // 转换数据过滤相同数据
-    filterData(list) {
-      let data = list;
-      let obj = {};
-      let arr =
-        data &&
-        data.reduce(function(item, next) {
-          obj[next.location]
-            ? ""
-            : (obj[next.location] = true && item.push(next));
-          return item;
-        }, []);
+    // filterData(list) {
+    //   let data = list;
+    //   let obj = {};
+    //   let arr =
+    //     data &&
+    //     data.reduce(function(item, next) {
+    //       obj[next.location]
+    //         ? ""
+    //         : (obj[next.location] = true && item.push(next));
+    //       return item;
+    //     }, []);
 
-      arr &&
-        arr.forEach(temp => {
-          let len = 0;
-          data &&
-            data.forEach(item => {
-              if (temp.location == item.location) {
-                len++;
-              }
-            });
-          this.$set(temp, "len", len);
-        });
-      return arr;
-    },
+    //   arr &&
+    //     arr.forEach(temp => {
+    //       let len = 0;
+    //       data &&
+    //         data.forEach(item => {
+    //           if (temp.location == item.location) {
+    //             len++;
+    //           }
+    //         });
+    //       this.$set(temp, "len", len);
+    //     });
+    //   return arr;
+    // },
 
     // 选择日期
     selectedTime() {
@@ -280,10 +249,6 @@ export default {
         open_date: formatTime(this.curSelectTime, "YYYY-MM-DD"),
         code: this.curLotteryCode
       });
-      this.getSidesTotalFunc(
-        this.curLotteryCode,
-        formatTime(this.curSelectTime, "YYYY-MM-DD")
-      );
     },
 
     // 获取双面统计
@@ -296,27 +261,24 @@ export default {
       }).then(res => {
         if (res.code == 200) {
           this.sidesTotal = res.data;
-          this.$store.commit('IMG_LOADING', {name: 'sidesTotal', show: false});
-          //console.log(this.sidesTotal)
         }
       });
     },
     //计算是否标识对子号
     doubleNumberCount(index) {
       var res = [];
-      var data = this.lotteryData;
-      var selfData = data[index].data.open_numbers;
+      var data = this.lotteryDatas;
+      var selfData = data[index].open_numbers;
+      // console.log(selfData)
       var previewData, nextData;
-      data[index - 1]
-        ? (previewData = data[index - 1].data.open_numbers)
-        : null;
-      data[index + 1] ? (nextData = data[index + 1].data.open_numbers) : null;
+      data[index - 1] ? (previewData = data[index - 1].open_numbers) : null;
+      data[index + 1] ? (nextData = data[index + 1].open_numbers) : null;
       for (var i = 0; i < selfData.length; i++) {
         if (
           (previewData && selfData[i] == previewData[i]) ||
           (nextData && selfData[i] == nextData[i])
         ) {
-          res.push(selfData[i]);
+          res.push(i);
         }
       }
       return res;
@@ -335,10 +297,40 @@ export default {
     }
   },
   computed: {
+    // 当前彩种的球号
+    curLotteryNumbers() {
+      for(let item of this.lotteryCodes) {
+        if(item.code == this.curLotteryCode) {
+          return item.lottery_numbers
+        }
+      }
+    },
+    // 当前彩种的 location_name
+    locationName() {
+      for(let item of this.lotteryCodes) {
+        if(item.code == this.curLotteryCode) {
+          return item.lottery_location_names
+        }
+      }
+    },
+    // 当前彩种双面数据
+    sidesTotalField() {
+      for(let item of this.lotteryCodes) {
+        if(item.code == this.curLotteryCode) {
+          return item.sides_total_field
+        }
+      }
+    },
     // 判断是否有双面统计功能
     isSidesTotal() {
       for(let item of this.lotteryCodes) {
         if(item.code == this.curLotteryCode) {
+          if(item.is_sides_total == 1) {
+            this.getSidesTotalFunc(
+              this.curLotteryCode,
+              formatTime(this.curSelectTime, "YYYY-MM-DD")
+            );
+          }
           return item.is_sides_total
         }
       }
@@ -347,31 +339,24 @@ export default {
     isLongDragon() {
       for(let item of this.lotteryCodes) {
         if(item.code == this.curLotteryCode) {
-          return item.is_long_dragon
-        }
-      }
-    },
-    // 加载 loading
-    imgLoaderShow(data) {
-      return function(data) {
-        for(let item of this.imgLoading) {
-          if(item.name == data) {
-            return item.show
+          if(item.is_long_dragon == 1) {
+            this.getLongDragon({ code: this.curLotteryCode });
           }
+          return item.is_long_dragon
         }
       }
     },
     ...mapGetters([
       "dragonData",
       "lotteryData",
+      "lotteryDatas",
       "curLotteryCode",
       "historyTitle",
       "lotteryType",
-      "curLotteryNumbers",
+      "lotteryCode",
       "screeningParameter",
       "socketOpenResult",
       "lotteryCodes",
-      "imgLoading",
       "isNoContent"
     ]),
     showSpecialNumber() {
@@ -385,6 +370,30 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.item-box{
+  display: flex; justify-content:space-between;align-items:center;border: 1px solid #e5e5e5;
+  li{
+    text-align: center;flex:1;height: 34px;line-height: 34px;border-right: 1px solid #e5e5e5;
+  }
+  li:last-child{
+    border-right: none
+  }
+}
+.item-box-list{
+  display: flex; justify-content:space-between;align-items:center;
+  li{
+    text-align: center;flex:1;display: flex;height: 34px;line-height: 34px;border: 1px solid #e5e5e5;border-top:none;border-right:none;
+    span{
+      flex:1;border-right: 1px solid #e5e5e5;
+    }
+    span:last-child{
+    border-right: none;
+  }
+  }
+  li:last-child{
+    border-right: 1px solid #e5e5e5;
+  }
+}
 .historyData {
   background-color: #fff;
   padding: 10px;
@@ -482,10 +491,11 @@ export default {
 }
 .changlongTable {
   tr {
-    border: none;
+    // border: none;
+    // border: 1px solid #e5e5e5;
   }
   td {
-    padding: 0;
+    padding: 0;border: 1px solid #e5e5e5;
     span {
       width: 20%;
       float: left;
@@ -497,6 +507,7 @@ export default {
       line-height: 40px;
       text-align: center;
     }
+    span:nth-child(5),span:nth-child(10),span:nth-child(15),span:nth-child(20){border-right: none};
   }
 }
 .dataTabs {

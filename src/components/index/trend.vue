@@ -5,7 +5,7 @@
       <router-link tag="a" to="index">首页</router-link>>走势图表
     </div>
     <div class="trendList">
-      <dl v-for="(item,index) in lotteryCodes" :key="index">
+      <dl v-for="(item,index) in lotteryCodes" :key="index" v-show="item.is_trend_chart == 1">
         <dt>
           <a href="javascript:;" @click="goTo(item.code, '/Data/trendChart')">
             <img :src="item.logo" alt>

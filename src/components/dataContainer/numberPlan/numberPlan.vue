@@ -1,13 +1,14 @@
 <template>
   <div class="numberPlan">
     <div class="title">
-      <span
-        v-if="planData.location"
-      >{{locationName}}{{curForecastQuantity == 0 ? planData.forecast_quantity_list[0].forecast_quantity : curForecastQuantity}}码定位计划 1天/{{planData.wheel_quantity}}轮 1轮/{{planData.wheel_expect_quantity}}期</span>
-      <span v-if="planData.expert_list">
+      <span class="left">
+        <span v-if="locationName">{{locationNameTop}}</span><span v-if="planData.forecast_quantity_list">{{curForecastQuantity == 0 ? planData.forecast_quantity_list[0].forecast_quantity : curForecastQuantity}}</span>码定位计划
+        1天/{{planData.wheel_quantity}}轮 1轮/{{planData.wheel_expect_quantity}}期
+      </span>
+      <span class="right">
         模拟倍率：
-        <input type="text" id="rate" disabled :value="planData.analog_magnification">&nbsp;模拟金额：
-        <input type="text" id="money" disabled :value="planData.simulated_amount">&nbsp;元/注&nbsp;
+        <input type="text" id="rate" disabled :value="baseSettingLotteryData.analog_magnification">&nbsp;模拟金额：
+        <input type="text" id="money" disabled :value="baseSettingLotteryData.simulated_amount">&nbsp;元/注&nbsp;
         <a id="btn" href="javascript:();">设置</a>&nbsp;&nbsp;专家算法：
         <select name="select" ref="selectCurExpertId"  @change="curExpertIdChange">
           <option
@@ -25,7 +26,7 @@
         >点击搜索计划</a>
       </span>
     </div>
-    <div class="tab" v-if="planData.expert_forecast_data_list">
+    <div class="tab">
       <div class="left">
         <span
           @click="selectCurForecastQuantity(item)"
@@ -35,16 +36,14 @@
         >{{item}}码定位</span>
       </div>
       <div class="right">
-        <span
-          :class="{'active':locationName == item.location_name}"
-          @click="curLocation = item.location"
-          v-for="(item,index) in planData.location"
-          :key="index"
-        >{{item.location_name}}</span>
+        <span 
+          :class="{'active':locationNameTop == item}"
+          v-for="(item, index) in locationName" 
+          :key="index" 
+          @click="curLocation = index + 1">
+          {{item}}
+        </span>
       </div>
-    </div>
-    <div class="loading-img" v-if="imgLoaderShow">
-      <img src="../../../assets/images/Ellipsis-1s-100px.gif" alt="">
     </div>
     <div v-if="isNoContent" class="no-content">暂无数据</div>
     <div v-else class="table" >
@@ -235,14 +234,12 @@ export default {
       }).then(res => {
         if (res.code == 200) {
           // 无数据状态
-          if(res.data == []) {
+          if(res.data.expert_forecast_data_list.length == 0) {
             this.$store.commit('IS_NO_CONTENT', true)
           }else {
             this.$store.commit('IS_NO_CONTENT', false)
           }
           this.planData = res.data;
-          this.$store.commit('IMG_LOADING', {name: 'numberPlan', show: false});
-          // console.log(this.planData)
         } else {
           //todo
         }
@@ -254,23 +251,22 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(["curLotteryCode", "socketOpenResult", "lotteryCodes", "imgLoading", "isNoContent", "numberPlanParams"]),
-    // 加载 loading
-    imgLoaderShow() {
-      for(let item of this.imgLoading) {
-        if(item.name == 'numberPlan') {
-          return item.show
+    ...mapGetters(["curLotteryCode", "socketOpenResult", "lotteryCodes", "isNoContent", "numberPlanParams", "baseSettingLotteryData"]),
+    // 当 location 为 0 时拿到第一个
+    locationNameTop() {
+      if(this.curLocation == 0) {
+        return this.locationName[0]
+      }else {
+        return this.locationName[this.curLocation - 1]
+      }
+    },
+    locationName() {
+      for(let item of this.lotteryCodes) {
+        if(item.code == this.curLotteryCode) {
+          return item.lottery_location_names
         }
       }
     },
-    // 当 location 为 0 时拿到第一个
-    locationName() {
-      if(this.curLocation == 0) {
-        return this.planData.location[0].location_name
-      }else {
-        return this.planData.location[this.curLocation - 1].location_name
-      }
-    }
   },
   watch: {
     socketOpenResult: function() {
@@ -327,42 +323,39 @@ export default {
     font-size: 16px;
     border-bottom: 1px solid #e5e5e5;
     color: #333;
-    span {
-      &:nth-of-type(1) {
-        float: left;
-      }
-      &:nth-of-type(2) {
-        float: right;
+    .left{
+      float: left;
+    }
+    .right{
+      float: right;font-size: 14px;
+      input {
+        height: 28px;
+        border: 1px solid #ddd;
+        line-height: 28px;
+        background: #fff;
+        width: 50px;
+        text-align: center;
         font-size: 14px;
-        input {
-          height: 28px;
-          border: 1px solid #ddd;
-          line-height: 28px;
-          background: #fff;
-          width: 50px;
-          text-align: center;
-          font-size: 14px;
-        }
-        select {
-          height: 28px;
-          border: 1px solid #ddd;
-          line-height: 28px;
-          background: #fff;
-          width: 100px;
-          text-align: center;
-          font-size: 14px;
-        }
-        .search {
-          display: inline-block;
-          height: 28px;
-          line-height: 28px;
-          text-align: center;
-          padding: 0 6px 0 6px;
-          border-radius: 3px;
-          font-size: 14px;
-          background: #e73f3f;
-          color: #fff;
-        }
+      }
+      select {
+        height: 28px;
+        border: 1px solid #ddd;
+        line-height: 28px;
+        background: #fff;
+        width: 100px;
+        text-align: center;
+        font-size: 14px;
+      }
+      .search {
+        display: inline-block;
+        height: 28px;
+        line-height: 28px;
+        text-align: center;
+        padding: 0 6px 0 6px;
+        border-radius: 3px;
+        font-size: 14px;
+        background: #e73f3f;
+        color: #fff;
       }
     }
   }

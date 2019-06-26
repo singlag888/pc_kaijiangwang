@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import {mapActions, mapState, mapGetters} from 'vuex';
+import {mapActions, mapGetters} from 'vuex';
 
 export default {
   name: 'App',
@@ -15,34 +15,35 @@ export default {
     }
   },
   mounted(){
-    this.$nextTick(()=>{
-
-    })
     this.getLotteryCodes()
   },
   methods:{
     ...mapActions(['getLotteryCodes'])
   },
   computed: {
-    ...mapGetters(['baseSettingData'])
+    ...mapGetters(['baseSettingBase'])
   },
   watch: {
     // 客服
-    'baseSettingData.service_code': {
+    'baseSettingBase.service_code': {
       handler(val) {
-        let c = document.createElement('script');
-        c.src = val;
-        let s = document.getElementsByTagName('script')[0];
-        s.parentNode.insertBefore(c, s);
+        setTimeout(() => {
+          let c = document.createElement('script');
+          c.src = val;
+          let s = document.getElementsByTagName('script')[0];
+          s.parentNode.insertBefore(c, s);
+        },2000) 
       }
     },
     // 站点统计
-    'baseSettingData.site_statis': {
+    'baseSettingBase.site_statis': {
       handler(val) {
-        let c = document.createElement('script');
-        c.src = val;
-        let s = document.getElementsByTagName('script')[0];
-        s.parentNode.insertBefore(c, s);
+        setTimeout(() => {
+          let c = document.createElement('script');
+          c.src = val;
+          let s = document.getElementsByTagName('script')[0];
+          s.parentNode.insertBefore(c, s);
+        },2000)       
       }
     }
   }

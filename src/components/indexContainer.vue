@@ -6,7 +6,7 @@
     <!-- 具体内容页面 -->
     <div class="container pageWidth">
       <div class="advertisement">
-        <img :src="item.img" alt="" v-for="(item, index) of advertisementArr" :key="index" @click="go(item.url)">
+        <img :src="item.img" alt="" v-for="(item, index) of adList.rows" :key="index" @click="go(item.url)">
       </div>
       <router-view/>
     </div>
@@ -30,12 +30,12 @@ import VHeader from './header/VHeader'
 import VFooter from './footer/VFooter'
 import { mapActions, mapGetters } from 'vuex';
 import { goImgUrl } from "@/assets/js/utils";
+
 export default {
   name: 'indexContainer',
   components: {VHeader,VFooter},
   data () {
     return {
-      advertisementArr: [],
       pushArr: [],
       codesName: []
     }
@@ -43,16 +43,9 @@ export default {
   created(){ 
     //获取首页通栏广告
     this.getAdvertisement({ad_category_identification: 'headAd'})
-    .then(res => {
-      if(res.code === 200){
-        if(res.data.rows){
-          this.advertisementArr = res.data.rows;
-        }
-      }
-    });
   },
   computed: {
-    ...mapGetters(['socketPlanResult', 'lotteryCodes'])
+    ...mapGetters(['socketPlanResult', 'lotteryCodes', 'adList'])
   },
   methods:{
     ...mapActions(['getAdvertisement', 'chengecurLotteryCode']),

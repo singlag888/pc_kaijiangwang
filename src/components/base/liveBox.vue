@@ -1,9 +1,9 @@
 <template>
   <div class="liveBox" v-if="curReslut.is_live">
     <div class="imgBox" @click="toPage(curReslut)">
-      <img :src="curReslut.logo" alt>
+      <img :src="codeLogo" alt>
     </div>
-    <div class="nameBox">{{curReslut.name}}开奖直播</div>
+    <div class="nameBox">{{codeName}}开奖直播</div>
     <div class="tipsBox">{{curReslut.live_description}}</div>
     <div class="timeDownBox">
       距下期开奖:<time-down :isLastQs="curReslut.remaining_expect" :time="nextOpenSeconds"/>
@@ -38,7 +38,23 @@ export default {
       }
   },
   computed: {
-    ...mapGetters(["socketOpenResult", "socketUpdateTime"])
+    ...mapGetters(["socketOpenResult", "socketUpdateTime", "lotteryCodes"]),
+    // 单独显示彩种名称
+    codeName() {
+      for(let item of this.lotteryCodes) {
+        if(item.code == this.curReslut.code) {
+          return item.name
+        }
+      }
+    },
+    // 单独显示彩种logo
+    codeLogo() {
+      for(let item of this.lotteryCodes) {
+        if(item.code == this.curReslut.code) {
+          return item.logo
+        }
+      }
+    }
   },
   watch: {
     result: function() {

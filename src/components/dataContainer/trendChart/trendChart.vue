@@ -35,7 +35,7 @@
             <ul class="numTab">
               <li
                 @click="changeNumTab(index)"
-                v-for="(item,index) in  basicTrend.location_names"
+                v-for="(item,index) in locationName"
                 :key="index"
                 :class="{'active':curNumTabIndex == index}"
               >{{item}}</li>
@@ -47,39 +47,30 @@
             <table>
               <tr>
                 <th width="110" rowspan="2">统计类型</th>
-                <template
-                  v-for="(item,index) in basicTrend && filterData(basicTrend)"
-                >
-                  <th
-                    :colspan="item.len"
-                    v-if="item.type == 'open_numbers'"
-                    :key="index+'_key1_'"
-                  >{{basicTrend.location_names[curNumTabIndex]}}</th>
-                  <th :colspan="item.len" v-else :key="index">{{item.type_name}}</th>
+                <template v-if="lotteryNumbers">
+                  <th :colspan="lotteryNumbers.length">{{locationName[curNumTabIndex]}}</th>
+                  <th colspan="3">回摆</th>
+                  <th colspan="2">单双</th>
+                  <th colspan="2">大小</th>
                 </template>
               </tr>
               <tr>
-                <th
-                  width="60"
-                  v-for="(item,index) in basicTrend.total"
-                  :key="index+'_key2_'"
-                >{{item.result}}</th>
+                <th width="60" v-for="(item,index) in lotteryNumbers" :key="index+'_key2_'">{{item}}</th>
+                <th width="60">反</th>
+                <th width="60">重</th>
+                <th width="60">正</th>
+                <th width="60">单</th>
+                <th width="60">双</th>
+                <th width="60">大</th>
+                <th width="60">小</th>
               </tr>
               <tr>
                 <td>总次数</td>
-                <td
-                  width="60"
-                  v-for="(item,index) in basicTrend.total"
-                  :key="index+'_key3_'"
-                >{{item.count}}</td>
+                <td width="60" v-for="(item,index) in basicTrend.total" :key="index+'_key3_'">{{item.count}}</td>
               </tr>
               <tr>
                 <td>最大遗漏</td>
-                <td
-                  width="60"
-                  v-for="(item,index) in basicTrend.total"
-                  :key="index+'_key4_'"
-                >{{item.max_missing}}</td>
+                <td width="60" v-for="(item,index) in basicTrend.total" :key="index+'_key4_'" >{{item.max_missing}}</td>
               </tr>
             </table>
           </div>
@@ -87,28 +78,24 @@
             <table ref="Table">
               <tr>
                 <th width="110" rowspan="2">期号</th>
-                <template
-                  v-for="(item,index) in basicTrend && filterData(basicTrend)"
-                >
-                  <th
-                    :colspan="item.len"
-                    v-if="item.type == 'open_numbers'"
-                    :key="index+'_key5_'"
-                  >{{basicTrend.location_names[curNumTabIndex]}}走势</th>
-                  <th :colspan="item.len" v-else :key="index+'_key5_'">{{item.type_name}}</th>
+                <template v-if="lotteryNumbers">
+                  <th :colspan="lotteryNumbers.length">{{locationName[curNumTabIndex]}}走势</th>
+                  <th colspan="3">回摆</th>
+                  <th colspan="2">单双</th>
+                  <th colspan="2">大小</th>
                 </template>
               </tr>
               <tr>
-                <th
-                  width="60"
-                  v-for="(item,index) in basicTrend.total"
-                  :key="index+'_key6_'"
-                >{{item.result}}</th>
+                <th width="60" v-for="(item,index) in lotteryNumbers" :key="index+'_key6_'">{{item}}</th>
+                <th width="60">反</th>
+                <th width="60">重</th>
+                <th width="60">正</th>
+                <th width="60">单</th>
+                <th width="60">双</th>
+                <th width="60">大</th>
+                <th width="60">小</th>
               </tr>
-              <tr
-                v-for="(item,index) in basicTrend.details"
-                :key="index+'_key7_'"
-              >
+              <tr v-for="(item,index) in basicTrend.details" :key="index+'_key7_'" >
                 <td>{{item[0].expect}}</td>
                 <template v-for="(obj,key) in item">
                   <td width="60" :key="num+'_key8_'+key" v-for="(ball,num) in obj.row">
@@ -142,9 +129,6 @@
             </div>
           </div>
         </div>
-        <div class="loading-img" v-if="imgLoaderShow">
-          <img src="../../../assets/images/Ellipsis-1s-100px.gif" alt="">
-        </div> 
       </div>
     </div>
   </div>
@@ -154,12 +138,12 @@ import Datepicker from "vuejs-datepicker";
 import { zh } from "vuejs-datepicker/dist/locale";
 import { mapGetters, mapActions } from "vuex";
 import { getCurTime, formatTime } from "@/assets/js/utils";
+
 export default {
   name: "trendChart",
   components: { Datepicker },
   data() {
     return {
-      locationNames: [],
       selectedGroup: 0, //选中的组
       selectedCode: 0, //选中的彩种
       selectedNum: 0, //选中的号码
@@ -200,7 +184,6 @@ export default {
             this.$store.commit('IS_NO_CONTENT', false)
           }
           this.basicTrend = res.data;
-          this.$store.commit('IMG_LOADING', {name: 'basicTrend', show: false})
           setTimeout(() => {
             this.drawTrend();
           }, 30);
@@ -249,29 +232,29 @@ export default {
     },
 
     // 转换数据过滤相同数据
-    filterData(list) {
-      let data = list && list.total;
-      let obj = {};
-      let arr =
-        data &&
-        data.reduce(function(item, next) {
-          obj[next.type] ? "" : (obj[next.type] = true && item.push(next));
-          return item;
-        }, []);
+    // filterData(list) {
+    //   let data = list && list.total;
+    //   let obj = {};
+    //   let arr =
+    //     data &&
+    //     data.reduce(function(item, next) {
+    //       obj[next.type] ? "" : (obj[next.type] = true && item.push(next));
+    //       return item;
+    //     }, []);
 
-      arr &&
-        arr.forEach(temp => {
-          let len = 0;
-          data &&
-            data.forEach(item => {
-              if (temp.type == item.type) {
-                len++;
-              }
-            });
-          this.$set(temp, "len", len);
-        });
-      return arr;
-    },
+    //   arr &&
+    //     arr.forEach(temp => {
+    //       let len = 0;
+    //       data &&
+    //         data.forEach(item => {
+    //           if (temp.type == item.type) {
+    //             len++;
+    //           }
+    //         });
+    //       this.$set(temp, "len", len);
+    //     });
+    //   return arr;
+    // },
 
     // 选择日期
     selectedTime() {
@@ -286,12 +269,11 @@ export default {
         y2 = 0;
       let canvas = this.createCanvas(this.$refs.canvas);
       //获取位数
-      if(this.basicTrend.details) {
+      if(this.basicTrend.details) {       
         let trendLineNum = this.basicTrend.details.length - 1;
       }   
       var trendBallList = document.querySelectorAll(".win");
       if (trendBallList.length <= 1) return;
-      // for (var a = 0; a <= trendLineNum; a++) {
       //获取显示期数总条数
       for (var i = 0; i < trendBallList.length; i++) {
         //计算坐标的起始位置，并处于元素中心
@@ -364,14 +346,22 @@ export default {
     ...mapGetters([
       "curLotteryCode",
       "socketOpenResult",
-      "imgLoading",
-      "isNoContent"
+      "isNoContent",
+      "lotteryCodes"
     ]),
-    // 加载 loading
-    imgLoaderShow() {
-      for(let item of this.imgLoading) {
-        if(item.name == 'basicTrend') {
-          return item.show
+    // 当前彩种的 location_name
+    locationName() {
+      for(let item of this.lotteryCodes) {
+        if(item.code == this.curLotteryCode) {
+          return item.lottery_location_names
+        }
+      }
+    },
+    // 当前彩种的 lotteryNumbers
+    lotteryNumbers() {
+      for(let item of this.lotteryCodes) {
+        if(item.code == this.curLotteryCode) {
+          return item.lottery_numbers
         }
       }
     }

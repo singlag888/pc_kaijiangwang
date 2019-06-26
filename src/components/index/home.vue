@@ -42,11 +42,10 @@ export default {
         LotteryAnalysis
     },
     created(){
-        this.getArticleCategory();
         this.getLotteryCodes()
     },
     methods:{
-        ...mapActions(['getArticleCategory', 'getLotteryCodes']),
+        ...mapActions(['getLotteryCodes']),
     },
     computed:{
 

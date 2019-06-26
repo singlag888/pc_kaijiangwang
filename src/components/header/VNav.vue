@@ -40,6 +40,7 @@
 <script>
 import { GAMESGROUP } from "@/config/config";
 import { mapGetters, mapActions } from "vuex";
+
 export default {
   name: "VNav",
   props: ["lotteryCodes"],
@@ -52,10 +53,10 @@ export default {
     };
   },
   mounted() {
-    // console.log(GAMESGROUP);
+
   },
   computed: {
-    ...mapGetters(["curLotteryCode", "baseSettingData"])
+    ...mapGetters(["curLotteryCode"])
   },
   methods: {
     ...mapActions(["chengecurLotteryCode"]),
@@ -64,12 +65,6 @@ export default {
     changeLotteryCode(code) {
       this.chengecurLotteryCode(code);
       this.$router.push("/Data/historyData");
-      // if (this.$route.path.indexOf("Data") != -1 && code != 'bjkl8' || this.$route.path == '/forecastOverview') {
-      //   this.chengecurLotteryCode(code);
-      // } else {
-      //   this.chengecurLotteryCode(code);
-      //   this.$router.push("/Data/historyData");
-      // }
     }
   },
   watch: {

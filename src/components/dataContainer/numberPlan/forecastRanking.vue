@@ -20,7 +20,7 @@
           <select name="select" id="ssma" v-model="curQuantity">
             <option
               :value="item"
-              v-for="(item,index) in planData.forecast_quantity_list"
+              v-for="(item,index) in ForecastQuantityList"
               :key="index"
             >{{item}}码</option>
           </select>
@@ -38,22 +38,15 @@
               <li>查看</li>
             </ul>
             <div class="plan-table-content">
-              <!-- <router-link
-                target="_blank"
-                :to="'/Data/numberPlan?expertId='+item.expert_id+'&location='+item.location_key+'&forecastQuantity='+item.forecast_quantity+'&code='+curCode"
-                v-for="(item,index) in getCurList(list)"
-                :key="index"
-              > -->
-                <ul class="item" v-for="(item,index) in getCurList(list)" :key="index" @click="goTo(item.expert_id, item.location_key, item.forecast_quantity)">
-                  <li>{{item.name}}</li>
-                  <li>{{item.location}}</li>
-                  <li>{{item.forecast_quantity}}码</li>
-                  <li>{{item.last_sum}}中{{item.result_sum}}</li>
-                  <li style="color:red">{{(item.result*100).toFixed(2)}}%</li>
-                  <li style="color:green">{{item.profit}}元</li>
-                  <li>查看</li>
-                </ul>
-              <!-- </router-link> -->
+              <ul class="item" v-for="(item,index) in getCurList(list)" :key="index" @click="goTo(item.expert_id, item.location_key, item.forecast_quantity)">
+                <li>{{item.name}}</li>
+                <li>{{item.location}}</li>
+                <li>{{item.forecast_quantity}}码</li>
+                <li>{{item.last_sum}}中{{item.result_sum}}</li>
+                <li style="color:red">{{(item.result*100).toFixed(2)}}%</li>
+                <li style="color:green">{{item.profit}}元</li>
+                <li>查看</li>
+              </ul>
             </div>
           </div>
         </div>
@@ -72,7 +65,8 @@ export default {
     return {
       curCode: this.curLotteryCode,
       curQuantity: 0,
-      list: []
+      list: [],
+      ForecastQuantityList: []
     };
   },
   methods: {
@@ -98,15 +92,27 @@ export default {
     },
 
     getForecastRankingFunc(code) {
+      this.ForecastQuantityList = []
       this.getForecastRanking(code).then(res => {
         if (res.code == 200) {
           this.list = res.data;
+          res.data.forEach((item) => {
+            this.ForecastQuantityList.push(item.forecast_quantity)
+          })
+          this.changecurQuantity()
         }
       });
+    },
+
+    changecurQuantity() {
+      let flag = this.ForecastQuantityList.includes(this.curQuantity)
+      if(flag == false) {
+        this.curQuantity = this.ForecastQuantityList[0]
+      }
     }
   },
   created() {
-    this.curQuantity = this.curForecastQuantity;
+    
     this.curCode = this.curLotteryCode;
     this.getForecastRankingFunc(this.curCode);
   },
@@ -119,12 +125,6 @@ export default {
     },
     curCode() {
       this.getForecastRankingFunc(this.curCode);
-    },
-    planData() {
-      // 如果当前码数为 0 选择第一个
-      if(this.curQuantity == 0) {
-        this.curQuantity = this.planData.forecast_quantity_list[0]
-      }
     }
   },
   mounted() {

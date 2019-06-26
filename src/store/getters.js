@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import storage from "good-storage";
 
 // loading
 export const imgLoading =state=> state.imgLoading;
@@ -7,13 +8,22 @@ export const imgLoading =state=> state.imgLoading;
 export const isNoContent =state=> state.isNoContent;
 
 // 当前彩种code
-export const curLotteryCode =state=> state.curLotteryCode;
+export const curLotteryCode =state=> {
+    if(state.curLotteryCode == '') {
+        return storage.get('PC_CUR_LOTTERY_CODE')
+    }else {
+        return state.curLotteryCode
+    }
+}
 
 // 当前彩种类型
-export const cur_lottery_type =state=> state.cur_lottery_type;
-
-// 文章分类
-export const articleCategory =state=> state.articleCategory;
+export const cur_lottery_type =state=> {
+    if(state.cur_lottery_type == '') {
+        return storage.get('PC_CUR_LOTTERY_TYPE')
+    }else {
+        return state.cur_lottery_type
+    }
+}
 
 // 彩种编码
 export const lotteryCodes =state=> state.lotteryCodes;
@@ -23,9 +33,14 @@ export const adList =state=> state.adList;
 
 // 基础数据
 export const lotteryData =state=> state.lotteryData;
+// 获取基础数据--中间信息
+export const lotteryDatas =state=> state.lotteryDatas;
 
 // 基础配置数据
-export const baseSettingData =state=> state.baseSettingData;
+export const baseSettingBase =state=> state.baseSettingBase;
+export const baseSettingLotteryData =state=> state.baseSettingLotteryData;
+export const baseSettingSys =state=> state.baseSettingSys;
+export const baseSettingUpload =state=> state.baseSettingUpload;
 
 // 当前彩种开奖结果
 export const openResult =state=> state.openResult;
@@ -34,7 +49,7 @@ export const openResult =state=> state.openResult;
 export const historyTitle =state=> {
     state.historyTitle && state.historyTitle.forEach(item=>{
         if(!Array.isArray(item)){
-            let len = state.lotteryData.length>0 ? state.lotteryData[0].data[item.type].length : 0;
+            let len = state.lotteryData.length>0 ? state.lotteryData[0][item.type].length : 0;
             Vue.set(item,'len',len);
         }
     });
@@ -43,12 +58,11 @@ export const historyTitle =state=> {
 
 // 保存历史数据 code_type
 export const lotteryType =state=> state.lotteryType;
+// 保存历史数据 code
+export const lotteryCode =state=> state.lotteryCode;
 
 //长龙数据
 export const dragonData =state=> state.dragonData;
-
-//当前彩种所有球号
-export const curLotteryNumbers =state=> state.curLotteryNumbers;
 
 //websocket开奖结果
 export const socketOpenResult =state=> state.socketOpenResult;

@@ -26,6 +26,13 @@ export function getLotteryDataAPI(){
         isOpenLoading: false
     }
 }
+//  获取基础数据--中间信息
+export function getLotteryDatasAPI(){
+    return {
+        url: `/v1/LotteryDataOpenNumbers`,
+        isOpenLoading: false
+    }
+}
 
 //  获取文章列表
 export function getArticlesAPI(){
@@ -63,14 +70,6 @@ export function getLongDragonAPI(){
 export function getBasicTrendAPI(){
     return {
         url: `/v1/basicTrend`,
-        isOpenLoading: false
-    }
-}
-
-//  文章分类
-export function getArticleCategoryAPI(){
-    return {
-        url: `/v1/articleCategory`,
         isOpenLoading: false
     }
 }

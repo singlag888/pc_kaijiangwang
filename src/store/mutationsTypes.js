@@ -10,9 +10,6 @@ export const CUR_LOTTERY_CODE = 'CUR_LOTTERY_CODE';
 // 当前彩种类型
 export const CUR_LOTTERY_TYPE = 'CUR_LOTTERY_TYPE';
 
-// 文章分类
-export const ARTICLE_CATEGORY = 'ARTICLE_CATEGORY';
-
 // 彩种编码
 export const LOTTERY_CODES = 'LOTTERY_CODES';
 
@@ -21,12 +18,17 @@ export const AD_LIST = 'AD_LIST';
 
 // 基础数据
 export const LOTTERY_DATA = 'LOTTERY_DATA';
+// 获取基础数据--中间信息
+export const LOTTERY_DATAS = 'LOTTERY_DATAS';
 
 // 号码名次
 export const LOCATION_NAMES = 'LOCATION_NAMES';
 
 // 基础配置数据
-export const BASE_SETTING_DATA = 'BASE_SETTING_DATA';
+export const BASE_SETTING_BASE = 'BASE_SETTING_BASE';
+export const BASE_SETTING_LOTTERYDATA = 'BASE_SETTING_LOTTERYDATA';
+export const BASE_SETTING_SYS = 'BASE_SETTING_SYS';
+export const BASE_SETTING_UPLOAD = 'BASE_SETTING_UPLOAD';
 
 //长龙数据
 export const SAVE_CHANGLONG_DATA = 'SAVE_CHANGLONG_DATA';
@@ -39,9 +41,8 @@ export const HISTORY_TITLE = 'HISTORY_TITLE';
 
 //保存历史数据 code_type
 export const LOTTERY_TYPE = 'LOTTERY_TYPE';
-
-//当前彩种所有球号
-export const CUR_LOTTERY_NUMBERS = 'CUR_LOTTERY_NUMBERS';
+//保存历史数据 code
+export const LOTTERY_CODE = 'LOTTERY_CODE';
 
 //websocket开奖结果
 export const SOCKET_OPEN_RESULT = 'SOCKET_OPEN_RESULT';

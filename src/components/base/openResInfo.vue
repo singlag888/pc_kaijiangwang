@@ -2,11 +2,11 @@
     <div class="openResInfo">
         <div class="openInfo">
             <div class="imgBox">
-                <img :src="curReslut.logo" alt="">
+                <img :src="codeLogo" alt="">
             </div>
             <div class="resInfo">
                 <h1>
-                    {{curReslut.name}}
+                    {{codeName}}
                     <span class="qs">{{curReslut.expect}}</span>
                     期
                 </h1>
@@ -19,26 +19,6 @@
                 <!-- 倒计时 -->
                 <time-down  @callBackFunc="callBackFunc" :isLastQs="curReslut.remaining_expect" :time="nextOpenSeconds"/>
             </div>
-        </div>
-        <!-- 长龙  todo  抽出来做组建 -->
-        <div class="resTable" v-if="isShowChangLong" >
-            <table border="0" cellpadding="1" cellspacing="1">
-              <tbody><tr>
-                  <th v-for="(item,index) in result.NoScreeningParameter" :key="index+index+'_t_'" :colspan="item.data.length">{{item.name}}</th>
-              </tr>
-              <tr>
-                <template v-for="(item,index) in result.NoScreeningParameter" >
-                  <td v-for="(obj,key) in item.data" :key="+key+'_k_'+index">{{obj}}</td>
-                </template>
-              </tr>
-            </tbody>
-          </table>
-          <div class="more">
-            <a href="javascript:;" @click="goTo(curReslut.code, '/Data/luZhu')">龙虎路珠</a>
-            <a href="javascript:;" @click="goTo(curReslut.code, '/Data/trendChart')">位置走势</a>
-            <a href="javascript:;" @click="goTo(curReslut.code, '/Data/trendChart')">长龙提醒</a>
-            <a href="javascript:;" @click="goTo(curReslut.code, '/Data/hotNumber')">冷热分析</a>
-          </div>
         </div>
     </div>
 </template>
@@ -73,7 +53,7 @@ export default {
     }
   },
   computed:{
-    ...mapGetters(['socketOpenResult', 'socketUpdateTime', 'openResult']),
+    ...mapGetters(['socketOpenResult', 'socketUpdateTime', 'openResult', 'lotteryCodes']),
     // 是否显示当前期数和剩余期数
     isShowPeriods() {
       if(this.curReslut.code == 'hk6' || this.curReslut.code == 'fc3d' || this.curReslut.code == 'pl3') {
@@ -93,6 +73,22 @@ export default {
           }
         }
       }      
+    },
+    // 单独显示彩种名称
+    codeName() {
+      for(let item of this.lotteryCodes) {
+        if(item.code == this.curReslut.code) {
+          return item.name
+        }
+      }
+    },
+    // 单独显示彩种logo
+    codeLogo() {
+      for(let item of this.lotteryCodes) {
+        if(item.code == this.curReslut.code) {
+          return item.logo
+        }
+      }
     }
   },
   watch:{

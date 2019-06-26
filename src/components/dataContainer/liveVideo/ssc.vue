@@ -185,9 +185,9 @@ export default {
           counttime: ticking,
           preDrawIssue: openResult.next_expect,
           drawTime: openResult.next_open_datetime,
-          sumNum: openResult.NoScreeningParameter[0].data[0],
-          sumSingleDouble: openResult.NoScreeningParameter[0].data[2],
-          sumBigSmall: openResult.NoScreeningParameter[0].data[1],
+          sumNum: openResult.no_screening_parameter[0].data[0],
+          sumSingleDouble: openResult.no_screening_parameter[0].data[2],
+          sumBigSmall: openResult.no_screening_parameter[0].data[1],
           dragonTiger: ''
         });
       } else {

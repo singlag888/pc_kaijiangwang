@@ -1,7 +1,7 @@
 <template>
   <!-- 路珠走势 -->
   <div>
-    <div class="dewdrop">
+    <div class="dewdrop" >
       <div class="tableBox">
         <div class="tableTitle">
           <div class="fl">
@@ -11,7 +11,7 @@
             <select v-model="name">
               <option
                 :value="typeName"
-                v-for="(typeName) in  title[pIndex][cIndex].type_name"
+                v-for="(typeName) in  luzuList[cIndex].type_name"
                 :key="typeName"
               >{{typeName}}</option>
             </select>
@@ -23,10 +23,10 @@
           </div>
           <div class="fr rightBox">
             <span>今天累计：</span>
-            <span>{{title[pIndex][cIndex].type_name[0]}}（{{calcTotalCount(title[pIndex][cIndex].type_name[0])}}）</span>
-            <span>{{title[pIndex][cIndex].type_name[1]}}（{{calcTotalCount(title[pIndex][cIndex].type_name[1])}}）</span>
-            <span class="c-red num-mc">{{title[pIndex][cIndex].location_name}}</span>
-            <span class="c-red">{{title[pIndex][cIndex].type_name}}</span>
+            <span>{{luzuList[cIndex].type_name[0]}}（{{calcTotalCount(luzuList[cIndex].type_name[0])}}）</span>
+            <span>{{luzuList[cIndex].type_name[1]}}（{{calcTotalCount(luzuList[cIndex].type_name[1])}}）</span>
+            <span class="c-red num-mc">{{title[pIndex].location_name}}</span>
+            <span class="c-red">{{luzuList[cIndex].type_name}}</span>
             <span class="c-red">最新&nbsp;↓</span>
           </div>
         </div>
@@ -56,7 +56,7 @@
 <script>
 export default {
   name: "louZhu",
-  props: ["list", "pIndex", "title", "cIndex"],
+  props: ["list", "pIndex", "title", "cIndex", "luzuList"],
   data() {
     return {
       count: "",
@@ -67,7 +67,7 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
-      this.name = this.title[this.pIndex][this.cIndex].type_name[0];
+      this.name = this.luzuList[this.cIndex].type_name[0]
     });
   },
   methods: {

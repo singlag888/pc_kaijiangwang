@@ -1,4 +1,5 @@
 import * as types from './mutationsTypes'
+import storage from "good-storage";
 
 const mutations = {
   // loading
@@ -20,16 +21,13 @@ const mutations = {
   // 当前彩种code
   [types.CUR_LOTTERY_CODE](state, code) {
     state.curLotteryCode = code;
+    storage.set('PC_CUR_LOTTERY_CODE', code)      
   },
 
   // 当前彩种类型
   [types.CUR_LOTTERY_TYPE](state, type) {
     state.cur_lottery_type = type;
-  },
-
-  // 文章分类
-  [types.ARTICLE_CATEGORY](state, obj) {
-    state.articleCategory = obj;
+    storage.set('PC_CUR_LOTTERY_TYPE', type)
   },
 
   // 彩种编码
@@ -46,10 +44,23 @@ const mutations = {
   [types.LOTTERY_DATA](state, list) {
     state.lotteryData = list;
   },
+  // 获取基础数据--中间信息
+  [types.LOTTERY_DATAS](state, list) {
+    state.lotteryDatas = list;
+  },
 
   // 基础配置数据
-  [types.BASE_SETTING_DATA](state, obj) {
-    state.baseSettingData = obj;
+  [types.BASE_SETTING_BASE](state, obj) {
+    state.baseSettingBase = obj;
+  },
+  [types.BASE_SETTING_LOTTERYDATA](state, obj) {
+    state.baseSettingLotteryData = obj;
+  },
+  [types.BASE_SETTING_SYS](state, obj) {
+    state.baseSettingSys = obj;
+  },
+  [types.BASE_SETTING_UPLOAD](state, obj) {
+    state.baseSettingUpload = obj;
   },
 
   // 当前彩种开奖结果
@@ -65,11 +76,6 @@ const mutations = {
   //长龙数据
   [types.SAVE_CHANGLONG_DATA](state, list) {
     state.dragonData = list;
-  },
-
-  //当前彩种所有球号
-  [types.CUR_LOTTERY_NUMBERS](state, list) {
-    state.curLotteryNumbers = list;
   },
 
   //websocket开奖结果
@@ -93,8 +99,12 @@ const mutations = {
   },
 
   //保存历史数据 code_type
-  [types.LOTTERY_TYPE](state, data) {
-    state.lotteryType = data;
+  [types.LOTTERY_TYPE](state, code_type) {
+    state.lotteryType = code_type;
+  },
+  //保存历史数据 code
+  [types.LOTTERY_CODE](state, code) {
+    state.lotteryCode = code;
   },
 
   //计划参数

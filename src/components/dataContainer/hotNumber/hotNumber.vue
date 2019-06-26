@@ -17,29 +17,25 @@
             <th width="400">温</th>
             <th width="345">冷</th>
           </tr>
-          <tr v-if="imgLoaderShow">
-            <td colspan="10">
-              <div>
-                <img src="../../../assets/images/Ellipsis-1s-100px.gif" alt="">
-              </div>
-            </td>
-          </tr>
           <tr v-if="isNoContent">
             <td colspan="10">
               <span class="no-content">暂无数据</span>
             </td>
           </tr>
-          <tr v-else v-for="(item,index) in list.rows" :key="index">
-            <td>{{item[0]}}</td>
-            <td>
-              <openCode :codeType="list.code_type" :result="item[1]"/>
+          <tr v-else v-for="(item,index) in locationName" :key="index">
+            <td>{{item}}</td> 
+            <td v-if="list.rows != undefined">
+              <openCode :codeType="list.code_type" :result="list.rows[index][0]"/>
             </td>
-            <td>
-              <openCode :codeType="list.code_type" :result="item[2]"/>
+            <td v-else></td>
+            <td v-if="list.rows != undefined">
+              <openCode :codeType="list.code_type" :result="list.rows[index][1]"/>
             </td>
-            <td>
-              <openCode :codeType="list.code_type" :result="item[3]"/>
+            <td v-else></td>
+            <td v-if="list.rows != undefined">
+              <openCode :codeType="list.code_type" :result="list.rows[index][2]"/>
             </td>
+            <td v-else></td>
           </tr>
         </table>
       </div>
@@ -49,6 +45,7 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import openCode from "@/components/base/openCode/openCode.vue";
+
 export default {
   name: "hotNumber",
   components: { openCode },
@@ -80,23 +77,22 @@ export default {
           }else {
             this.$store.commit('IS_NO_CONTENT', false)
           }
-          this.list = res.data;
-          this.$store.commit('IMG_LOADING', {name: 'hotNumber', show: false});
+          this.list = res.data;         
         }
       });
     }
   },
   computed: {
-    ...mapGetters(["curLotteryCode", "socketOpenResult", "lotteryCodes", "imgLoading", "isNoContent"]),
+    ...mapGetters(["curLotteryCode", "socketOpenResult", "lotteryCodes", "isNoContent"]),
 
-    // 加载 loading
-    imgLoaderShow() {
-      for(let item of this.imgLoading) {
-        if(item.name == 'hotNumber') {
-          return item.show
+    // 当前彩种的 location_name
+    locationName() {
+      for(let item of this.lotteryCodes) {
+        if(item.code == this.curLotteryCode) {
+          return item.lottery_location_names
         }
       }
-    }
+    },
     
   },
   watch: {

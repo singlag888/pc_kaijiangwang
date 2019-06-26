@@ -10,10 +10,10 @@
           <router-link tag="li" to="/trend"><i class="fas fa-chart-bar"></i>走势图表</router-link>
           <router-link tag="li" to="/live"><i class="fas fa-tv"></i>开奖直播</router-link>
           <router-link tag="li" to="/forecastOverview"><i class="fa fa-crosshairs"></i>精准计划</router-link>
-          <li @click="hanldClick(baseSettingData.wap_domain)"><i class="fas fa-mobile"></i>手机访问</li>
+          <li @click="hanldClick(baseSettingBase.wap_domain)"><i class="fas fa-mobile"></i>手机访问</li>
           <!-- <li @click="hanldClick(baseSettingData.recommend_url)"><i class="fa fa-thumbs-up"></i>本站推荐</li> -->
-          <li @click="hanldClick(baseSettingData.speed_lottery_url)"><i class="fas fa-external-link-alt"></i>{{baseSettingData.speed_lottery_title}}</li>
-          <li @click="hanldClick(baseSettingData.happy_lottery_url)"><i class="fas fa-external-link-alt"></i>{{baseSettingData.happy_lottery_title}}</li>
+          <li @click="hanldClick(baseSettingLotteryData.speed_lottery_url)"><i class="fas fa-external-link-alt"></i>{{baseSettingLotteryData.speed_lottery_title}}</li>
+          <li @click="hanldClick(baseSettingLotteryData.happy_lottery_url)"><i class="fas fa-external-link-alt"></i>{{baseSettingLotteryData.happy_lottery_title}}</li>
         </ul>
       </div>
     </div>
@@ -54,12 +54,12 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(["baseSettingData","lotteryCodes"]),
+    ...mapGetters(["baseSettingBase", "baseSettingLotteryData", "lotteryCodes"]),
     imgUrl() {
-      if(storage.get('pc_headerImg')) {
-        return storage.get('pc_headerImg')
+      if(storage.get('pc_headerImg') == undefined) {
+        return this.baseSettingBase.site_logo
       }else {
-        this.baseSettingData.site_logo
+        return storage.get('pc_headerImg')
       }
     }
   },

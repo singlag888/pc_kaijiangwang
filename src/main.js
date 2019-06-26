@@ -50,11 +50,11 @@ new Vue({
     });
   },
   computed: {
-    ...mapGetters(['baseSettingData','curLotteryCode'])
+    ...mapGetters(['baseSettingSys','curLotteryCode'])
   },
   watch: {
-    baseSettingData:function(){
-      this.socketApi.initWebSocket(this.baseSettingData.websocket_client);
+    baseSettingSys:function(){
+      this.socketApi.initWebSocket(this.baseSettingSys.websocket_client);
       this.socketApi.sendSock('test',this.getConfigResult);   
     }
   },

@@ -9,7 +9,7 @@
       <router-link to="/Data/trendChart" @click="isActiveLive=false;" v-show="curCodeInfo.is_trend_chart != 0" tag="li">走势图表</router-link>
       <router-link to="/Data/hotNumber" @click="isActiveLive=false;" v-show="curCodeInfo.is_cold_and_hot_number != 0" tag="li">冷热号码</router-link>
       <router-link :to="activeTab" @click="isActiveLive=false;" v-show="curCodeInfo.is_live !=0" tag="li">开奖直播</router-link>
-      <router-link to="/Data/luZhu" @click="isActiveLive=false;" v-show="curCodeInfo.is_road_beads != 0" tag="li">露珠走势</router-link>
+      <router-link to="/Data/luZhu" @click="isActiveLive=false;" v-show="curCodeInfo.is_road_beads != 0" tag="li">路珠走势</router-link>
       <router-link to="/Data/numberPlan" @click="isActiveLive=false;" v-show="curCodeInfo.is_forecast_rule != 0" tag="li">定位计划</router-link>
     </ul>
     <router-view/>

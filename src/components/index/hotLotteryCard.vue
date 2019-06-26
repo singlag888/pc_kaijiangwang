@@ -4,13 +4,13 @@
           <dl>
             <dt>
               <a href="javascript:;" @click="goTo(curReslut.code, '/Data/historyData')">
-                <img :src="curReslut.logo" width="100">
+                <img :src="codeLogo" width="100">
               </a>
             </dt>
             <dd>
               <span class="getName">
                 <strong>
-                  <a href="javascript:;" @click="goTo(curReslut.code, '/Data/historyData')">{{curReslut.name}}</a>
+                  <a href="javascript:;" @click="goTo(curReslut.code, '/Data/historyData')">{{codeName}}</a>
                 </strong>
                 <em>
                   第
@@ -50,7 +50,7 @@ export default {
         };
     },
     computed: {
-        ...mapGetters(['socketOpenResult', 'socketUpdateTime']),
+        ...mapGetters(['socketOpenResult', 'socketUpdateTime', 'lotteryCodes']),
         // 是否显示当前期数和剩余期数
         isShowPeriods() {
           if(this.curReslut.code == 'hk6' || this.curReslut.code == 'fc3d' || this.curReslut.code == 'pl3') {
@@ -58,6 +58,22 @@ export default {
           } else {
             return true 
           }     
+        },
+        // 单独显示彩种名称
+        codeName() {
+          for(let item of this.lotteryCodes) {
+            if(item.code == this.curReslut.code) {
+              return item.name
+            }
+          }
+        },
+        // 单独显示彩种logo
+        codeLogo() {
+          for(let item of this.lotteryCodes) {
+            if(item.code == this.curReslut.code) {
+              return item.logo
+            }
+          }
         }
     },
     methods: {

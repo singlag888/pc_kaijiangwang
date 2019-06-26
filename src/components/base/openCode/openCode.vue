@@ -3,16 +3,20 @@
   <div class="openCode" v-show="!isOPen">
     <span
       class="ball"
-      :class="['num'+ (item.open_numbers ? item.open_numbers : item), code == 'cqklsf' ? 'cqklsf' :codeType, 
-          {'bigOrSingal': selectedTableShowData != 'open_numbers' && (item.big_small == '大' || item.singal_double == '单' || item.quality_mix == '合')},
-          {'smallOrDouble': selectedTableShowData != 'open_numbers' && (item.big_small == '小' || item.singal_double == '双' || item.quality_mix == '质')},
+      :class="['num'+ (item.open_numbers == 0 ? 0 : item.open_numbers ? item.open_numbers : item), code == 'cqklsf' ? 'cqklsf' :codeType, 
+          {'orange': selectedTableShowData =='big_small' && item.big_small == '大'},
+          {'blue': selectedTableShowData =='big_small' && item.big_small == '小'},
+          {'blue': selectedTableShowData == 'single_double' && item.single_double == '单'},
+          {'orange': selectedTableShowData == 'single_double' && item.single_double == '双'},
+          {'orange': selectedTableShowData == 'quality_mix' && item.quality_mix == '质'},
+          {'blue': selectedTableShowData == 'quality_mix' && item.quality_mix == '合'},
           {'positionD': selectedTableShowData != 'open_numbers' && (item.position == '东')},
           {'positionX': selectedTableShowData != 'open_numbers' && (item.position == '西')},
           {'positionN': selectedTableShowData != 'open_numbers' && (item.position == '南')},
           {'positionB': selectedTableShowData != 'open_numbers' && (item.position == '北')},
           code
         ]"
-      :style="{'opacity' : showNumber(item.open_numbers) ? 1 : 0.1}"
+      :style="{'opacity' : showNumber(index, item.open_numbers, item.big_small, item.single_double, item.quality_mix, item.position, item.wealth) ? 1 : 0.1}"
       v-for="(item,index) in allResultData"
       :key="index"
     >
@@ -23,16 +27,20 @@
   <div class="openCode" v-show="isOPen" ref="openCode">
     <span
       class="ball"
-      :class="['num'+ (item.open_numbers ? item.open_numbers : item), code == 'cqklsf' ? 'cqklsf' :codeType, 
-          {'bigOrSingal': selectedTableShowData != 'open_numbers' && (item.big_small == '大' || item.singal_double == '单' || item.quality_mix == '合')},
-          {'smallOrDouble': selectedTableShowData != 'open_numbers' && (item.big_small == '小' || item.singal_double == '双' || item.quality_mix == '质')},
+      :class="['num'+ (item.open_numbers == 0 ? 0 : item.open_numbers ? item.open_numbers : item), code == 'cqklsf' ? 'cqklsf' :codeType, 
+          {'orange': selectedTableShowData =='big_small' && item.big_small == '大'},
+          {'blue': selectedTableShowData =='big_small' && item.big_small == '小'},
+          {'blue': selectedTableShowData == 'single_double' && item.single_double == '单'},
+          {'orange': selectedTableShowData == 'single_double' && item.single_double == '双'},
+          {'orange': selectedTableShowData == 'quality_mix' && item.quality_mix == '质'},
+          {'blue': selectedTableShowData == 'quality_mix' && item.quality_mix == '合'},
           {'positionD': selectedTableShowData != 'open_numbers' && (item.position == '东')},
           {'positionX': selectedTableShowData != 'open_numbers' && (item.position == '西')},
           {'positionN': selectedTableShowData != 'open_numbers' && (item.position == '南')},
           {'positionB': selectedTableShowData != 'open_numbers' && (item.position == '北')},
           code
         ]"
-      :style="{'opacity' : showNumber(item.open_numbers) ? 1 : 0.1}"
+      :style="{'opacity' : showNumber(index, item.open_numbers, item.big_small, item.single_double, item.quality_mix, item.position, item.wealth) ? 1 : 0.1}"
       v-for="(item,index) in allResultData"
       :key="index"
     >
@@ -120,73 +128,59 @@ export default {
         clearTimeout(this.setTimeFunc);
       }
     },
-    showNumber(item) {
+    showNumber(index, item, big_small, single_double, quality_mix, position, wealth) {
       if (!this.showSpecialNumber) return true; //没有选择分布则全部显示
       var res = true;
       //属于重复出现的号码  并且已选择对子号分布
-      if (
-        this.selectedNumberType == "pairs" &&
-        this.doubleNumber.indexOf(item) < 0
-      ) {
+      if(this.selectedNumberType == "pairs" && this.doubleNumber.indexOf(index) < 0) {
         res = false;
       }
-      if (this.selectedNumberType == "double" && item % 2 != 0) {
+      if (this.selectedNumberType == "double" && single_double != '双') {      
         res = false;
       }
-      if (this.selectedNumberType == "single" && item % 2 == 0) {
+      if (this.selectedNumberType == "single" && single_double != '单') {
         res = false;
       }
-      if (
-        this.selectedNumberType == "big" && item <= this.curLotteryNumbers.length/2) {
+      if (this.selectedNumberType == "big" && big_small != "大") {
         res = false;
       }
-      if (
-        this.selectedNumberType == "small" && item > this.curLotteryNumbers.length/2) {
+      if (this.selectedNumberType == "small" && big_small != "小") {
         res = false;
       }
       // 质
-      if (
-        this.selectedNumberType == "quality" && (item == 0 || item == 4 || item == 6 || item == 8 || item == 9)) {
+      if (this.selectedNumberType == "quality" && quality_mix != '质') {
         res = false;
       }
       // 合
-      if (
-        this.selectedNumberType == "combined" && (item == 1 || item == 2 || item == 3 || item == 5 || item == 7)) {
+      if (this.selectedNumberType == "combined" && quality_mix != '合') {
         res = false;
       }
       // 东
-      if (
-        this.selectedNumberType == "east" && [1,5,9,13,17].indexOf(item) == -1) {
+      if (this.selectedNumberType == "east" && position != '东') {
         res = false;
       }
       // 西
-      if (
-        this.selectedNumberType == "weat" && [3,7,11,15,19].indexOf(item) == -1) {
+      if (this.selectedNumberType == "weat" && position != '西') {
         res = false;
       }
       // 南
-      if (
-        this.selectedNumberType == "south" && [2,6,10,14,18].indexOf(item) == -1) {
+      if (this.selectedNumberType == "south" && position != '南') {
         res = false;
       }
       // 北
-      if (
-        this.selectedNumberType == "north" && [4,8,12,16,20].indexOf(item) == -1) {
+      if (this.selectedNumberType == "north" && position != '北') {
         res = false;
       }
       // 中
-      if (
-        this.selectedNumberType == "in" && ([1,2,3,4,5,6,7].indexOf(item) == -1)) {
+      if (this.selectedNumberType == "in" && wealth != '中') {
         res = false;
       }
       // 发
-      if (
-        this.selectedNumberType == "hair" && ([8,9,10,11,12,13,14].indexOf(item) == -1)) {
+      if (this.selectedNumberType == "hair" && wealth != '发') {
         res = false;
       }
       // 白
-      if (
-        this.selectedNumberType == "white" && ([15,16,17,18,19,20].indexOf(item) == -1)) {
+      if (this.selectedNumberType == "white" && wealth != '白') {
         res = false;
       }
       // 已选择的球号分布
@@ -198,8 +192,6 @@ export default {
 
   },
   computed: {
-    ...mapGetters(["curLotteryCode","curLotteryNumbers"]),
-
     allResultData() {
         //大小单双号码 组合
       var res = [];
@@ -374,11 +366,11 @@ export default {
         }
       }
     }
-    &.bigOrSingal {
+    &.orange {
       background: #ff7300 !important;
       color: #fff !important;
     }
-    &.smallOrDouble {
+    &.blue {
       background: #569ebb !important;
       color: #fff !important;
     }

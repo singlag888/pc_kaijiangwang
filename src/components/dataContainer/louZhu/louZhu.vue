@@ -43,35 +43,10 @@
       <div class="trendFilter">
         <!-- 综合模式 -->
         <div class="box zonghe">
-          <dl v-show="tabIndex == 2">
-            <dt>选择路珠：</dt>
-            <dd class="filterLz">
-              <a
-                href="javascript:;"
-                @click="selectDewdrop('big_small')"
-                :class="{'active':curDewdrop == 'big_small'}"
-              >大小</a>
-              <a
-                href="javascript:;"
-                @click="selectDewdrop('single_double')"
-                :class="{'active':curDewdrop == 'single_double'}"
-              >单双</a>
-              <a
-                href="javascript:;"
-                @click="selectDewdrop('dragon_tiger')"
-                :class="{'active':curDewdrop == 'dragon_tiger'}"
-              >龍虎</a>
-            </dd>
-          </dl>
           <dl v-show="tabIndex == 1 ||  tabIndex == 2">
             <dt>筛选名次：</dt>
             <dd class="filter-mc clearfix">
-              <label
-                v-for="(item,index) in titleList"
-                @click="checkedSingle(item)"
-                :class="{'active':item.isChecked}"
-                :key="index"
-              >
+              <label v-for="(item,index) in locationNameTitle" @click="checkedSingle(item)" :class="{'active':item.isChecked}" :key="index">
                 <b>
                   <i v-show="item.isChecked">
                     <i class="fa fa-check"></i>
@@ -85,28 +60,16 @@
               </div>
             </dd>
           </dl>
-          <dl v-show="tabIndex == 3">
-            <dt>选择路珠：</dt>
+          <dl v-show="tabIndex == 3" class="ts-mc">
+            <dt>筛选名次：</dt>
             <dd class="filter-mc filterLz">
-              <a
-                href="javascript:;"
-                v-for="(item,index) in titleList"
-                @click="onlyOneTitle(index)"
-                :key="index"
-                :class="{'active':item.isChecked}"
-              >{{item.location_name}}</a>
+              <a href="javascript:;" v-for="(item,index) in locationNameTitle" @click="onlyOneTitle(index)" :key="index" :class="{'active':item.isChecked}">{{item.location_name}}</a>
             </dd>
           </dl>
           <dl v-show="tabIndex == 1 || tabIndex == 3">
-            <dt v-show="tabIndex == 1">选择路珠：</dt>
-            <dt v-show="tabIndex == 3">筛选名次：</dt>
+            <dt>选择路珠：</dt>
             <dd class="filter-lz">
-              <label
-                :class="{'active':dd.isLuzu}"
-                v-for="(dd,k) in playList"
-                :key="dd.type+k"
-                @click="dd.isLuzu = !dd.isLuzu"
-              >
+              <label :class="{'active':dd.isLuzu}" v-for="(dd,k) in luzuPlayList" :key="'type'+k" @click="dd.isLuzu = !dd.isLuzu">
                 <b>
                   <i v-show="dd.isLuzu">
                     <i class="fa fa-check"></i>
@@ -116,28 +79,38 @@
               </label>
             </dd>
           </dl>
+          <dl v-show="tabIndex == 2">
+            <dt>选择路珠：</dt>
+            <dd class="filterLz">
+              <a
+                :class="{'active':dd.isLuzu}" 
+                v-for="(dd,k) in luzuPlayList" 
+                :key="'type'+k" 
+                @click="onlyOnePlayList(k)"
+                href="javascript:;"
+              >{{dd.type_name}}</a>
+            </dd>
+          </dl>
         </div>
       </div>
       <!-- 露珠走势 -->
-      <div class="loading-img" v-if="imgLoaderShow">
-        <img src="../../../assets/images/Ellipsis-1s-100px.gif" alt="">
-      </div>
       <div v-if="isNoContent" class="no-content">暂无数据</div>
       <div
         v-else
         v-for="(item,index) in glassBeadList && glassBeadList.list"
-        v-show="titleList[index].isChecked"
+        v-show="locationNameTitle[index].isChecked"
         :key="index"
       >
         <Trend
+          v-show="luzuPlayList[key].isLuzu"
+          :glassBeadList="glassBeadList.list"
           :list="obj"
           v-for="(obj,key) in item"
           :cIndex="key"
-          v-show="playList[key] && playList[key].isLuzu"
-          :title="glassBeadList.title"
+          :title="locationNameTitle"
           :pIndex="index"
-          :name="item.location_name"
           :key="key"
+          :luzuList="luzuPlayList"
         />
       </div>
     </div>
@@ -164,63 +137,63 @@ export default {
         format: "yyyy-MM-dd"
       },
       glassBeadList: [], // 露珠数据
-      titleList: [], //标题
-      playList: [], //玩法
-      curDewdrop: ""
+      locationNameTitle: [],//标题
+      luzuPlayList:[] //玩法
     };
   },
   mounted() {
     this.$nextTick(() => {
       this.getGlassBeadTrendFunc(this.curLotteryCode, getCurTime("YYYY-MM-DD"));
+      this.changeTabIndex(this.tabIndex);
     });
   },
   methods: {
     ...mapActions(["getGlassBeadTrend"]),
 
-    // 选择露珠
-    selectDewdrop(type) {
-      // console.log(this.playList);
-      this.playList.forEach(item => {
-        if (type == item.type) {
+    // 单选
+    checkedSingle(item) {
+      item.isChecked = !item.isChecked;
+    },
+
+    // 单选名次 
+    onlyOneTitle(index) {
+      this.locationNameTitle.forEach((item, i) => {
+        if (index == i) {
+          item.isChecked = true;
+        } else {
+          item.isChecked = false;
+        }
+      });
+    },
+
+    // 单路珠选择
+    onlyOnePlayList(index) {
+      this.luzuPlayList.forEach((item, i) => {
+        if (index == i) {
           item.isLuzu = true;
         } else {
           item.isLuzu = false;
         }
       });
-      this.curDewdrop = type;
     },
 
-    // 单选
-    checkedSingle(item) {
-      item.isChecked = !item.isChecked;
-      console.log(item.isChecked);
-    },
-
-    // 全选
+    // 重置名次 && 全选
     allChecked() {
-      this.titleList.forEach(item => {
-        this.$set(item, "isChecked", true);
-      });
+      this.locationNameTitle = []
+      this.setChecked()
     },
 
-    // 清除选择
-    clearChecked() {
-      this.titleList.forEach(item => {
-        this.$set(item, "isChecked", false);
-      });
+    // 重置露珠
+    resetPlayList() {
+      this.luzuPlayList = []
+      this.setLuzu()
     },
 
     // 选择日期
     selectedTime() {
-      if (
-        formatTime(this.curSelectTime, "YYYY-MM-DD") ==
-        changeTime(new Date(), -1, "YYYY-MM-DD")
-      ) {
+      if (formatTime(this.curSelectTime, "YYYY-MM-DD") == changeTime(new Date(), -1, "YYYY-MM-DD")) {
         this.dayIndex = 2;
-      } else if (
-        formatTime(this.curSelectTime, "YYYY-MM-DD") ==
-        changeTime(new Date(), -2, "YYYY-MM-DD")
-      ) {
+      } else if (formatTime(this.curSelectTime, "YYYY-MM-DD") == changeTime(new Date(), -2, "YYYY-MM-DD")) {
         this.dayIndex = 3;
       }
       this.getGlassBeadTrendFunc(
@@ -241,67 +214,27 @@ export default {
           }else {
             this.$store.commit('IS_NO_CONTENT', false)
           }
-          let tempArr = [];
-          this.titleList = [];
-          this.playList = [];
           this.glassBeadList = res.data;
-          this.glassBeadList &&
-            this.glassBeadList.title.forEach((item, index) => {
-              this.$set(item[0], "isChecked", true);
-              this.titleList.push(item[0]);
-              if (index == 0) {
-                tempArr = item;
-              }
-            });
-          tempArr.forEach(item => {
-            this.$set(item, "isLuzu", true);
-            this.playList.push(item);
-          });
-          this.changeTabIndex(this.tabIndex);
-          this.$store.commit('IMG_LOADING', {name: 'louZhu', show: false});
-        }
-      });
-    },
-
-    // 重置名次
-    resetTitleList() {
-      this.titleList.forEach(item => {
-        item.isChecked = true;
-      });
-    },
-
-    // 重置玩法
-    resetPlayList() {
-      this.playList.forEach(item => {
-        item.isLuzu = true;
-      });
-    },
-
-    // 单选名次
-    onlyOneTitle(index) {
-      this.titleList.forEach((item, i) => {
-        if (index == i) {
-          item.isChecked = true;
-        } else {
-          item.isChecked = false;
+          
         }
       });
     },
 
     //   切换玩法
     changeTabIndex(index) {
-      if (index == 2) {
-        this.selectDewdrop("big_small");
-        this.resetTitleList();
-      } else if (index == 1) {
-        this.resetPlayList();
-        this.resetTitleList();
-      } else if (index == 3) {
-        this.resetPlayList();
+      if(index == 1) {
+        this.allChecked()
+        this.resetPlayList()
+      } else if(index == 2) {
+        this.allChecked()
+        this.onlyOnePlayList(0);
+      }else {
         this.onlyOneTitle(0);
+        this.resetPlayList()
       }
       this.tabIndex = index;
     },
+
     // 切换日期
     changeDayIndex(index) {
       let date = formatTime(new Date(), "YYYY-MM-DD");
@@ -313,6 +246,46 @@ export default {
       this.curSelectTime = date;
       this.getGlassBeadTrendFunc(this.curLotteryCode, date);
       this.dayIndex = index;
+    },
+
+    // 设置名次的 isChecked 选择状态
+    setChecked() {
+      for(let item of this.lotteryCodes) {
+        if(item.code == this.curLotteryCode) {
+          let lottery_location_names = item.lottery_location_names
+          lottery_location_names.forEach((item, index) => {
+            let obj = {'location_name': item, 'isChecked': true}
+            this.locationNameTitle.push(obj);
+            });
+        }
+      }
+    },
+
+    // 清除名次的 isChecked 选择状态
+    clearChecked() {
+      this.locationNameTitle = []
+      for(let item of this.lotteryCodes) {
+        if(item.code == this.curLotteryCode) {
+          let lottery_location_names = item.lottery_location_names
+          lottery_location_names.forEach((item, index) => {
+            let obj = {'location_name': item, 'isChecked': false}
+            this.locationNameTitle.push(obj);
+            });
+        }
+      }
+    },
+
+    // 设置露珠的 isLuzu 选择状态
+    setLuzu() {
+      for(let item of this.lotteryCodes) {
+        if(item.code == this.curLotteryCode) {
+          let luzuPlayList = item.glass_bead_field
+          luzuPlayList.forEach((item, index) => {
+            let obj = {'type_name': item, 'isLuzu': true}
+            this.luzuPlayList.push(obj);
+          });
+        }
+      }
     }
   },
   components: {
@@ -320,18 +293,13 @@ export default {
     Trend
   },
   computed: {
-    ...mapGetters(["curLotteryCode", "socketOpenResult", "lotteryCodes", "imgLoading", "isNoContent"]),
-
-    // 加载 loading
-    imgLoaderShow() {
-      for(let item of this.imgLoading) {
-        if(item.name == 'louZhu') {
-          return item.show
-        }
-      }
-    }
+    ...mapGetters(["curLotteryCode", "socketOpenResult", "lotteryCodes", "isNoContent"])
   },
   watch: {
+    lotteryCodes() {
+      this.setChecked()
+      this.setLuzu()
+    },
     curLotteryCode: function() {
       this.getGlassBeadTrendFunc(this.curLotteryCode, getCurTime("YYYY-MM-DD"));
     },
@@ -352,6 +320,9 @@ export default {
 
 
 <style lang="scss" scoped>
+.ts-mc{
+      padding: 5px 0px 10px !important;
+}
 .loading-img{
   text-align: center
 }

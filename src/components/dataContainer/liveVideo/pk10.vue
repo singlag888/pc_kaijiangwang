@@ -398,12 +398,12 @@ export default {
       // 开奖期号
       $("#nextdrawtime").text(openResult.expect);
       // 冠亚和数据
-      $("#stat1_1").text(openResult.NoScreeningParameter[1].data[0]);
-      $("#stat1_2").text(openResult.NoScreeningParameter[1].data[1]);
-      $("#stat1_3").text(openResult.NoScreeningParameter[1].data[2]);
+      $("#stat1_1").text(openResult.no_screening_parameter[1].data[0]);
+      $("#stat1_2").text(openResult.no_screening_parameter[1].data[1]);
+      $("#stat1_3").text(openResult.no_screening_parameter[1].data[2]);
       // 龙虎
       for (var i = 0; i < 5; i++) {
-        $("#stat2_" + (i + 1)).text(openResult.NoScreeningParameter[0].data[i]);
+        $("#stat2_" + (i + 1)).text(openResult.no_screening_parameter[0].data[i]);
       }
     }
   },
