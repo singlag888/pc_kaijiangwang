@@ -127,6 +127,12 @@ export const getLongDragon = ({
   return api.getLongDragon(params).then((res) => {
     if (res.code == 200) {
       // todo
+      // 无数据状态
+      if(res.data.length == 0) {
+        commit(types.DRAGONDATA_NODATA, true);
+      }else {
+        commit(types.DRAGONDATA_NODATA, false);
+      }
       commit(types.SAVE_CHANGLONG_DATA, res.data);
     } else {
       //console.log(res)

@@ -184,7 +184,7 @@ export default {
         res = false;
       }
       // 已选择的球号分布
-      if (this.selectedOpenNumber && this.selectedOpenNumber != item) {
+      if(this.selectedOpenNumber != null && this.selectedOpenNumber != item) {
         res = false;
       }
       return res;

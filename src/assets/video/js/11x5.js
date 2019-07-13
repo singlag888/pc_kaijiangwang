@@ -105,8 +105,8 @@ export function playGame() {
     $("#opening").text("正在开奖..."), $("#hourtxt").hide(), $("#opening").show(), startGame(!0)
 }
 export function updateData (e) {
-    var n = 0 == e.sumBigSmall ? "大" : 1 == e.sumBigSmall ? "小" : "和",
-        a = 0 == e.sumSingleDouble ? "单" : 1 == e.sumSingleDouble ? "双" : "和";
+    var n = "大" == e.sumBigSmall ? "大" : "小" == e.sumBigSmall ? "小" : "和",
+        a =  "单" == e.sumSingleDouble ? "单" : "双" == e.sumSingleDouble ? "双" : "和";
     $("#drawIssue").text(e.drawIssue), $("#drawTime").text(e.drawTime.split(" ")[1]);
     var t = e.preDrawCode;
     $(t).each(function (e) {

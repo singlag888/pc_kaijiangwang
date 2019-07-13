@@ -3,6 +3,7 @@ export const IMG_LOADING = 'IMG_LOADING';
 
 // 是否暂无数据
 export const IS_NO_CONTENT = 'IS_NO_CONTENT';
+export const DRAGONDATA_NODATA = 'DRAGONDATA_NODATA';
 
 // 当前彩种code
 export const CUR_LOTTERY_CODE = 'CUR_LOTTERY_CODE';

@@ -6,6 +6,7 @@ export const imgLoading =state=> state.imgLoading;
 
 // 是否暂无数据
 export const isNoContent =state=> state.isNoContent;
+export const dragonDataNoData =state=> state.dragonDataNoData;
 
 // 当前彩种code
 export const curLotteryCode =state=> {

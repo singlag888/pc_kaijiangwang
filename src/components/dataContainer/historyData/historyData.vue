@@ -32,6 +32,7 @@
           :input-class="'datepickerInput'"
           :format="dateOption.format"
           :language="dateOption.language"
+          :disabledDates="disabledDates"
           v-model="curSelectTime"
           @closed="selectedTime"
         ></datepicker>
@@ -47,7 +48,10 @@
             <span v-for="(obj, key) in sidesTotalField" :key="key">{{obj}}</span>
           </li>
         </ul>
-        <ul class="item-box-list">
+        <ul v-if="sidesTotalNoData">
+          <li style="font-size: 20px;color: #666;text-align: center;">暂无数据</li>
+        </ul>
+        <ul v-else class="item-box-list">
           <li v-for="(item, index) in locationName" :key="index">
             <span v-for="(obj,key) in sidesTotal" :key="key" v-if="key >= (sidesTotalField.length * index) && key < (sidesTotalField.length * (index+1)) ">{{obj}}</span>
           </li>
@@ -58,7 +62,10 @@
       <div v-if="isLongDragon == 1">
         <table class="changlongTable" cellpadding="0" cellspacing="0">
           <th colspan="12">长龙连开提醒</th>
-          <tr>
+          <tr v-if="dragonDataNoData">
+            <td style="font-size: 20px;color: #666;">暂无数据</td>
+          </tr>
+          <tr v-else>
             <td v-if="dragonData.length > 0">
               <span
                 v-for="(data, index) in dragonData"
@@ -123,11 +130,11 @@
             <template v-show="!Array.isArray(item)">{{item.type_name}}</template>
           </td>
         </tr>
-        <!-- <tr v-if="isNoContent">
+        <tr v-if="isNoContent">
           <td colspan="10">
             <span class="no-content">暂无数据</span>
           </td>               
-        </tr> -->
+        </tr>
         <tr v-for="(item, index) in lotteryData" :key="index+'_t'">
           <td class="time">{{item.expect}} {{item.open_datetime.split(' ')[1]}}</td>
           <td class="nums" v-if="lotteryDatas.length > 0">
@@ -164,6 +171,7 @@ import { getCurTime, formatTime } from "@/assets/js/utils";
 import Datepicker from "vuejs-datepicker";
 import { zh } from "vuejs-datepicker/dist/locale";
 import openCode from "@/components/base/openCode/openCode.vue";
+import { constants } from 'crypto';
 
 export default {
   name: "historyData",
@@ -179,8 +187,12 @@ export default {
         language: zh,
         format: "yyyy-MM-dd"
       },
+      disabledDates: {
+        from: new Date()
+      },
       isShowSidesTotal: true,
       isShowLongDragon: true,
+      sidesTotalNoData: false
     };
   },
   mounted() {
@@ -190,6 +202,9 @@ export default {
   },
   watch: {
     curLotteryCode() {
+      this.bigSmallSingalDoubleReset()
+      this.resetSelectedNumber()
+      this.selectedTableShowData = 'open_numbers'
       this.getLotteryData({
         open_date: formatTime(this.curSelectTime, "YYYY-MM-DD"),
         code: this.curLotteryCode
@@ -260,6 +275,11 @@ export default {
         code: code
       }).then(res => {
         if (res.code == 200) {
+          if(res.data.length == 0) {
+            this.sidesTotalNoData = true
+          }else {
+            this.sidesTotalNoData = false
+          }
           this.sidesTotal = res.data;
         }
       });
@@ -357,7 +377,8 @@ export default {
       "screeningParameter",
       "socketOpenResult",
       "lotteryCodes",
-      "isNoContent"
+      "isNoContent",
+      "dragonDataNoData"
     ]),
     showSpecialNumber() {
       //是否显示部分号码（点击查看球号分布、大小分布时启用）

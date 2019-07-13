@@ -17,6 +17,9 @@ const mutations = {
   [types.IS_NO_CONTENT](state, data) {
     state.isNoContent = data;
   },
+  [types.DRAGONDATA_NODATA](state, data) {
+    state.dragonDataNoData = data;
+  },
 
   // 当前彩种code
   [types.CUR_LOTTERY_CODE](state, code) {

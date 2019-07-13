@@ -6,6 +6,7 @@ const state = {
     ],
     // 是否暂无数据
     isNoContent: false,
+    dragonDataNoData: false,
     // 当前彩种code
     curLotteryCode: '',
     // 当前彩种类型

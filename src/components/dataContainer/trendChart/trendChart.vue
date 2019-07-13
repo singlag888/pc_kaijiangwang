@@ -1,10 +1,7 @@
 <template>
   <div class="trendContainer pageWidth">
     <div class="data">
-      <div v-if="isNoContent" class="no-content">
-        暂无数据
-      </div>
-      <div v-else>
+      <div>
         <div class="title">
           <div class="filterTop">
             <a href="jacascript:void(0)" class="active">
@@ -20,6 +17,7 @@
                 :input-class="'datepickerInput'"
                 :format="dateOption.format"
                 :language="dateOption.language"
+                :disabledDates="disabledDates"
                 v-model="curSelectTime"
                 @closed="selectedTime"
               ></datepicker>
@@ -64,13 +62,16 @@
                 <th width="60">大</th>
                 <th width="60">小</th>
               </tr>
-              <tr>
+              <tr v-if="!totalNoData">
                 <td>总次数</td>
                 <td width="60" v-for="(item,index) in basicTrend.total" :key="index+'_key3_'">{{item.count}}</td>
               </tr>
-              <tr>
+              <tr v-if="!totalNoData">
                 <td>最大遗漏</td>
                 <td width="60" v-for="(item,index) in basicTrend.total" :key="index+'_key4_'" >{{item.max_missing}}</td>
+              </tr>
+              <tr v-else>
+                <td colspan="20" style="font-size: 20px;color: #666;">暂无数据</td>
               </tr>
             </table>
           </div>
@@ -95,15 +96,23 @@
                 <th width="60">大</th>
                 <th width="60">小</th>
               </tr>
-              <tr v-for="(item,index) in basicTrend.details" :key="index+'_key7_'" >
+              <tr v-if="detailsNoData">
+                <td colspan="20" style="font-size: 20px;color: #666;">暂无数据</td>
+              </tr>
+              <tr v-else v-for="(item,index) in basicTrend.details" :key="index+'_key7_'" >
                 <td>{{item[0].expect}}</td>
                 <template v-for="(obj,key) in item">
                   <td width="60" :key="num+'_key8_'+key" v-for="(ball,num) in obj.row">
+                    <!-- <span
+                      v-if="ball == 0 && obj.type == 'open_numbers'"
+                      class="win"
+                      :key="num+ball+'_key9_'"
+                    >{{num+1}}</span> -->
                     <span
                       v-if="ball == 0 && obj.type == 'open_numbers'"
                       class="win"
                       :key="num+ball+'_key9_'"
-                    >{{num+1}}</span>
+                    >{{lotteryNumbers[num]}}</span>
                     <span
                       v-else-if="ball == 0 && obj.type == 'back_swing'"
                       class="blue"
@@ -153,8 +162,13 @@ export default {
         language: zh,
         format: "yyyy-MM-dd"
       },
+      disabledDates: {
+        from: new Date()
+      },
       curTrendTabIndex: 1,
-      curNumTabIndex: 0
+      curNumTabIndex: 0,
+      totalNoData: false,
+      detailsNoData: false
     };
   },
   created() {
@@ -177,16 +191,22 @@ export default {
         location: location
       }).then(res => {
         if (res.code == 200) {
-          // 无数据状态
-          if(res.data.details.length == 0) {
-            this.$store.commit('IS_NO_CONTENT', true)
+          // 统计类型没有数据
+          if(res.data.total.length == 0) {
+            this.totalNoData = true
           }else {
-            this.$store.commit('IS_NO_CONTENT', false)
+            this.totalNoData = false
+          }
+          // 走势没有数据
+          if(res.data.details.length == 0) {
+            this.detailsNoData = true
+          }else {
+            this.detailsNoData = false
           }
           this.basicTrend = res.data;
-          setTimeout(() => {
-            this.drawTrend();
-          }, 30);
+          // setTimeout(() => {
+          //   this.drawTrend();
+          // }, 30);
         }
       });
     },
@@ -325,10 +345,10 @@ export default {
     // 切换号码
     changeNumTab(index) {
       this.curNumTabIndex = index;
-      this.getBasicTrendFunc(this.curLotteryCode, getCurTime("YYYY-MM-DD"), this.curNumTabIndex);
-      setTimeout(() => {
-        this.drawTrend();
-      }, 20);
+      this.getBasicTrendFunc(this.curLotteryCode, formatTime(this.curSelectTime, "YYYY-MM-DD"), this.curNumTabIndex);
+      // setTimeout(() => {
+      //   this.drawTrend();
+      // }, 20);
     },
 
     changeGroup(g) {
@@ -346,7 +366,6 @@ export default {
     ...mapGetters([
       "curLotteryCode",
       "socketOpenResult",
-      "isNoContent",
       "lotteryCodes"
     ]),
     // 当前彩种的 location_name
@@ -377,6 +396,11 @@ export default {
       ) {
         this.getBasicTrendFunc(this.curLotteryCode, getCurTime("YYYY-MM-DD"), this.curNumTabIndex);
       }
+    },
+    basicTrend() {
+      setTimeout(() => {
+        this.drawTrend();
+      }, 20);
     }
   }
 };

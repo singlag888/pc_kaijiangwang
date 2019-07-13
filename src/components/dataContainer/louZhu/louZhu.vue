@@ -32,6 +32,7 @@
                 :input-class="'datepickerInput'"
                 :format="dateOption.format"
                 :language="dateOption.language"
+                :disabledDates="disabledDates"
                 v-model="curSelectTime"
                 @closed="selectedTime"
               ></datepicker>
@@ -135,6 +136,9 @@ export default {
       dateOption: {
         language: zh,
         format: "yyyy-MM-dd"
+      },
+      disabledDates: {
+        from: new Date()
       },
       glassBeadList: [], // 露珠数据
       locationNameTitle: [],//标题

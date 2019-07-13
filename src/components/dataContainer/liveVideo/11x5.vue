@@ -118,11 +118,13 @@ export default {
       openResult.open_numbers.forEach(item => {
         sum += item;
       });
+      // console.log(openResult)
       if (this.firstLoad) {
         stopVideo({
           preDrawCode: openResult.open_numbers,
           sumNum: sum,
-          sumBigSmall: sum,
+          sumBigSmall: openResult.no_screening_parameter[0].data[1],
+          sumSingleDouble: openResult.no_screening_parameter[0].data[2],
           drawIssue: openResult.expect,
           drawNextIssue: openResult.next_expect,
           drawTime: openResult.next_open_datetime,
@@ -132,7 +134,8 @@ export default {
         stopVideo({
           preDrawCode: openResult.open_numbers,
           sumNum: sum,
-          sumBigSmall: sum,
+          sumBigSmall: openResult.no_screening_parameter[0].data[1],
+          sumSingleDouble: openResult.no_screening_parameter[0].data[2],
           drawIssue: openResult.expect,
           drawNextIssue: openResult.next_expect,
           drawTime: openResult.next_open_datetime,

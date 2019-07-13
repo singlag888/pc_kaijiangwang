@@ -4,7 +4,7 @@
       <h2>冷热分析</h2>
       <hr>
       <p class="titleText">
-        近{{curLength}}期内
+        近20期内
         <span class="hot">热码</span>：出现频繁、活跃的号码；
         <span class="cold">冷码</span>：出现频率低甚至没有出现的号码；
         <span class="warm">温码</span>：介于冷热之间的号码。
@@ -52,7 +52,7 @@ export default {
   data() {
     return {
       list: [],
-      curLength: 0
+      // curLength: 0
     };
   },
   mounted() {
@@ -70,7 +70,7 @@ export default {
       this.list = []
       this.getColdAndHotNumbers(code).then(res => {
         if (res.code == 200) {
-          this.curLength = res.data.rows.length;
+          // this.curLength = res.data.rows.length;
           // 无数据状态
           if(res.data.rows.length == 0) {
             this.$store.commit('IS_NO_CONTENT', true)

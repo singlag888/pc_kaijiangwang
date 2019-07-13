@@ -9,7 +9,7 @@
         模拟倍率：
         <input type="text" id="rate" disabled :value="baseSettingLotteryData.analog_magnification">&nbsp;模拟金额：
         <input type="text" id="money" disabled :value="baseSettingLotteryData.simulated_amount">&nbsp;元/注&nbsp;
-        <a id="btn" href="javascript:();">设置</a>&nbsp;&nbsp;专家算法：
+        <a id="btn" href="javascript:();"></a>&nbsp;&nbsp;专家算法：
         <select name="select" ref="selectCurExpertId"  @change="curExpertIdChange">
           <option
             v-for="(item,index) in planData.expert_list"
