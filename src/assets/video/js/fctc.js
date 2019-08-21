@@ -1,8 +1,9 @@
 var  isTry = !1, ifopen = !1, playa = "b", animateId = {}, timer = null, sound, audioType;
 var runBall1 = null, runBall2 = null, runBall3 = null;
 var curNumUlSetTime;
-
+var test = true
 export function stopAll(){
+    test = false
     clearInterval(timer);
 }
 
@@ -46,11 +47,13 @@ export function dropAgian(n) {
 }
 
 export function agianAnimate(n, e, a) {
-    var topN, leftN;
-    for (var t = e; t < a; t++) topN = createNum(50, 55), leftN = n.eq(t).position().left + createNum(-5, 5), $(".parLi").find("ul li").eq(t).animate({
-        top: topN + "px",
-        left: leftN + "px"
-    }, 500)
+    if(test) {
+        var topN, leftN;
+        for (var t = e; t < a; t++) topN = createNum(50, 55), leftN = n.eq(t).position().left + createNum(-5, 5), $(".parLi").find("ul li").eq(t).animate({
+            top: topN + "px",
+            left: leftN + "px"
+        }, 500)
+    }
 }
 
 export function dropStart(n, e, a) {
@@ -90,23 +93,26 @@ export function kaiMusic() {
     audioType = "r", sound.play("audioidKai"), sound.stop("audioidBg")
 }
 export function init() {
-    ifopen =1;
-    sound = {
-        play: function (n) {
-            "soundsOn" == $("#soundBth").attr("class") && document.getElementById(n).play()
-        }, stop: function (n) {
-            document.getElementById(n).pause()
-        }
-    }
-    $(".loading").fadeOut(1e3, function () {
-    }), $("#soundBth").on("click", function () {
-        "soundsOn" == $("#soundBth").attr("class") ? ($("#soundBth").removeClass("soundsOn").addClass("soundsOff"), sound.stop("audioidKai"), sound.stop("audioidBg")) : ($("#soundBth").removeClass("soundsOff").addClass("soundsOn"), "b" == audioType ? (sound.play("audioidBg"), sound.stop("audioidKai")) : (audioType, sound.play("audioidKai"), sound.stop("audioidBg")))
-    }), $("#tryBtn").on("click", function () {
-        if (isTry) return $(".jzCheck").show(), setTimeout(function () {
-            $(".jzCheck").hide()
-        }, 1e3), !1;
-        isTry = !0, startGame(1)
-    })
+        ifopen =1;
+        sound = {
+            play: function (n) {
+                "soundsOn" == $("#soundBth").attr("class") && document.getElementById(n).play()
+            }, 
+            stop: function (n) {
+                if(document.getElementById(n) != null) {
+                    document.getElementById(n).pause()
+                }                  
+            }
+        }       
+        $(".loading").fadeOut(1e3, function () {
+        }), $("#soundBth").on("click", function () {
+            "soundsOn" == $("#soundBth").attr("class") ? ($("#soundBth").removeClass("soundsOn").addClass("soundsOff"), sound.stop("audioidKai"), sound.stop("audioidBg")) : ($("#soundBth").removeClass("soundsOff").addClass("soundsOn"), "b" == audioType ? (sound.play("audioidBg"), sound.stop("audioidKai")) : (audioType, sound.play("audioidKai"), sound.stop("audioidBg")))
+        }), $("#tryBtn").on("click", function () {
+            if (isTry) return $(".jzCheck").show(), setTimeout(function () {
+                $(".jzCheck").hide()
+            }, 1e3), !1;
+            isTry = !0, startGame(1)
+        })
 }
 export function startGame(n) {
     kaiMusic();

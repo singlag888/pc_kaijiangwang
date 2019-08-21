@@ -30,6 +30,12 @@ const state = {
     openResult: {},
     // websocket开奖结果
     socketOpenResult: {},
+    // websocket长龙
+    socketLongDragon: [],
+    // websocket双面
+    socketSidesTotal: [],
+    // websocket冷热
+    socketColdHot: [],
     // websocket計劃
     socketPlanResult: {},
     // websocket 时间

@@ -48,6 +48,13 @@ export const LOTTERY_CODE = 'LOTTERY_CODE';
 //websocket开奖结果
 export const SOCKET_OPEN_RESULT = 'SOCKET_OPEN_RESULT';
 
+//websocket长龙
+export const SOCKET_LONG_DRAGON = 'SOCKET_LONG_DRAGON';
+//websocket双面
+export const SOCKET_SIDES_TOTAL = 'SOCKET_SIDES_TOTAL';
+//websocket冷热
+export const SOCKET_COLD_HOT = 'SOCKET_COLD_HOT';
+
 // websocket計劃
 export const SOCKET_PLAN_RESULT = 'SOCKET_PLAN_RESULT';
 

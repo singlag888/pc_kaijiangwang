@@ -64,11 +64,11 @@
               </tr>
               <tr v-if="!totalNoData">
                 <td>总次数</td>
-                <td width="60" v-for="(item,index) in basicTrend.total" :key="index+'_key3_'">{{item.count}}</td>
+                <td width="60" v-for="(item,index) in basicTrendTotal" :key="index+'_key3_'">{{item.count}}</td>
               </tr>
               <tr v-if="!totalNoData">
                 <td>最大遗漏</td>
-                <td width="60" v-for="(item,index) in basicTrend.total" :key="index+'_key4_'" >{{item.max_missing}}</td>
+                <td width="60" v-for="(item,index) in basicTrendTotal" :key="index+'_key4_'" >{{item.max_missing}}</td>
               </tr>
               <tr v-else>
                 <td colspan="20" style="font-size: 20px;color: #666;">暂无数据</td>
@@ -99,7 +99,7 @@
               <tr v-if="detailsNoData">
                 <td colspan="20" style="font-size: 20px;color: #666;">暂无数据</td>
               </tr>
-              <tr v-else v-for="(item,index) in basicTrend.details" :key="index+'_key7_'" >
+              <tr v-else v-for="(item,index) in basicTrendDetails" :key="index+'_key7_'" >
                 <td>{{item[0].expect}}</td>
                 <template v-for="(obj,key) in item">
                   <td width="60" :key="num+'_key8_'+key" v-for="(ball,num) in obj.row">
@@ -156,7 +156,9 @@ export default {
       selectedGroup: 0, //选中的组
       selectedCode: 0, //选中的彩种
       selectedNum: 0, //选中的号码
-      basicTrend: {}, //走势图数据
+      // basicTrend: {}, //走势图数据
+      basicTrendDetails: [],
+      basicTrendTotal: [],
       curSelectTime: new Date(),
       dateOption: {
         language: zh,
@@ -184,7 +186,9 @@ export default {
     ...mapActions(["getBasicTrend"]),
 
     getBasicTrendFunc(code, date, location) {
-      this.basicTrend = {}
+      // this.basicTrend = {}
+      this.basicTrendDetails = []
+      this.basicTrendTotal = []
       this.getBasicTrend({
         code: code,
         open_date: date,    
@@ -203,10 +207,9 @@ export default {
           }else {
             this.detailsNoData = false
           }
-          this.basicTrend = res.data;
-          // setTimeout(() => {
-          //   this.drawTrend();
-          // }, 30);
+          // this.basicTrend = res.data;
+          this.basicTrendDetails = res.data.details
+          this.basicTrendTotal = res.data.total
         }
       });
     },
@@ -251,31 +254,6 @@ export default {
       return sty;
     },
 
-    // 转换数据过滤相同数据
-    // filterData(list) {
-    //   let data = list && list.total;
-    //   let obj = {};
-    //   let arr =
-    //     data &&
-    //     data.reduce(function(item, next) {
-    //       obj[next.type] ? "" : (obj[next.type] = true && item.push(next));
-    //       return item;
-    //     }, []);
-
-    //   arr &&
-    //     arr.forEach(temp => {
-    //       let len = 0;
-    //       data &&
-    //         data.forEach(item => {
-    //           if (temp.type == item.type) {
-    //             len++;
-    //           }
-    //         });
-    //       this.$set(temp, "len", len);
-    //     });
-    //   return arr;
-    // },
-
     // 选择日期
     selectedTime() {
       this.getBasicTrendFunc(this.curLotteryCode, formatTime(this.curSelectTime, "YYYY-MM-DD"), this.curNumTabIndex);
@@ -289,8 +267,8 @@ export default {
         y2 = 0;
       let canvas = this.createCanvas(this.$refs.canvas);
       //获取位数
-      if(this.basicTrend.details) {       
-        let trendLineNum = this.basicTrend.details.length - 1;
+      if(this.basicTrendDetails) {       
+        let trendLineNum = this.basicTrendDetails.length - 1;
       }   
       var trendBallList = document.querySelectorAll(".win");
       if (trendBallList.length <= 1) return;
@@ -346,9 +324,6 @@ export default {
     changeNumTab(index) {
       this.curNumTabIndex = index;
       this.getBasicTrendFunc(this.curLotteryCode, formatTime(this.curSelectTime, "YYYY-MM-DD"), this.curNumTabIndex);
-      // setTimeout(() => {
-      //   this.drawTrend();
-      // }, 20);
     },
 
     changeGroup(g) {
@@ -394,10 +369,167 @@ export default {
         this.socketOpenResult.code == this.curLotteryCode &&
         getCurTime("YYYY-MM-DD") == formatTime(this.curSelectTime, "YYYY-MM-DD")
       ) {
-        this.getBasicTrendFunc(this.curLotteryCode, getCurTime("YYYY-MM-DD"), this.curNumTabIndex);
+        // 当前开奖号码-------------------------------------------------------------------------
+        let resultNumber = this.socketOpenResult.open_numbers[this.curNumTabIndex]
+        // 当前走势开奖号码的index
+        let openNumberIndex;
+        for(let i=0; i<this.lotteryNumbers.length; i++) {
+          if(this.lotteryNumbers[i] == resultNumber) {
+            openNumberIndex = i
+          }
+        }       
+        // 获取上一条数据的走势
+        let open_numbers = this.basicTrendDetails[0][0].row
+        // 走势新数组
+        let firearrOpenNumbers = open_numbers.map((item, index) => {
+          if(index == openNumberIndex) {
+            item = 0
+            // 中奖号码走势总次数加1
+            this.basicTrendTotal[index].count++;
+          }else {
+            item++
+            // 当前最大遗漏数(如果当前遗漏数(item)大于上一期遗漏数(this.basicTrendTotal[index].max_missing)就改变遗漏数)
+            if(this.basicTrendTotal[index].max_missing < item){
+              this.basicTrendTotal[index].max_missing = item;
+            }
+          }
+          return item
+        })
+        // 获取上一条数据的回摆(当期的开奖号码小于上一期为反  大于为正， 等于为重)-------------------------------------
+        // 上一期的开奖数据的index
+        let backIndex;
+        for(let i=0; i<open_numbers.length; i++) {
+          if(open_numbers[i] == 0) {
+            backIndex = i
+          }
+        }
+        // 上一期的开奖号码
+        let backOpenNumber;
+        for(let i=0; i<this.lotteryNumbers.length; i++) {
+          if(i == backIndex) {
+            backOpenNumber = this.lotteryNumbers[i]
+          }
+        }
+        // 获取上一条数据的回摆
+        let backSwing = this.basicTrendDetails[0][1].row
+        // 回摆新数组
+        let firearrbackSwing = backSwing.map((item, index) => {
+          if(resultNumber > backOpenNumber) {
+            if(index == 2) {
+              item = 0
+              // 中奖号码回摆总次数加1
+              this.basicTrendTotal[index + this.lotteryNumbers.length].count++;
+            }else {
+              item++
+              // 当前最大遗漏数(如果当前遗漏数(item)大于上一期遗漏数(this.basicTrendTotal[index].max_missing)就改变遗漏数)
+              if(this.basicTrendTotal[index + this.lotteryNumbers.length].max_missing < item){
+                this.basicTrendTotal[index + this.lotteryNumbers.length].max_missing = item;
+              }
+            }
+          }else if(resultNumber < backOpenNumber) {
+            if(index == 0) {
+              item = 0
+              // 中奖号码回摆总次数加1
+              this.basicTrendTotal[index + this.lotteryNumbers.length].count++;
+            }else {
+              item++
+              // 当前最大遗漏数(如果当前遗漏数(item)大于上一期遗漏数(this.basicTrendTotal[index].max_missing)就改变遗漏数)
+              if(this.basicTrendTotal[index + this.lotteryNumbers.length].max_missing < item){
+                this.basicTrendTotal[index + this.lotteryNumbers.length].max_missing = item;
+              }
+            }
+          }else {
+            if(index == 1) {
+              item = 0
+              // 中奖号码回摆总次数加1
+              this.basicTrendTotal[index + this.lotteryNumbers.length].count++;
+            }else {
+              item++
+              // 当前最大遗漏数(如果当前遗漏数(item)大于上一期遗漏数(this.basicTrendTotal[index].max_missing)就改变遗漏数)
+              if(this.basicTrendTotal[index + this.lotteryNumbers.length].max_missing < item){
+                this.basicTrendTotal[index + this.lotteryNumbers.length].max_missing = item;
+              }
+            }
+          }
+          return item
+        })
+        // 当前号码单双--------------------------------------------------------------------------
+        let allSingleDouble =  this.socketOpenResult.data.single_double[this.curNumTabIndex]
+        // 获取上一条数据的单双
+        let singleDouble = this.basicTrendDetails[0][2].row
+        // 单双新数组
+        let firearrSingleDouble = singleDouble.map((item, index) => {
+          if(allSingleDouble == '单') {
+            if(index == 0) {
+              item = 0
+              // 中奖号码单双总次数加1
+              this.basicTrendTotal[index + this.lotteryNumbers.length + 3].count++;
+            }else {
+              item++
+              // 当前最大遗漏数(如果当前遗漏数(item)大于上一期遗漏数(this.basicTrendTotal[index].max_missing)就改变遗漏数)
+              if(this.basicTrendTotal[index + this.lotteryNumbers.length + 3].max_missing < item){
+                this.basicTrendTotal[index + this.lotteryNumbers.length + 3].max_missing = item;
+              }
+            }
+          }else {
+            if(index == 1) {
+              item = 0
+              // 中奖号码单双总次数加1
+              this.basicTrendTotal[index + this.lotteryNumbers.length + 3].count++;
+            }else {
+              item++
+              // 当前最大遗漏数(如果当前遗漏数(item)大于上一期遗漏数(this.basicTrendTotal[index].max_missing)就改变遗漏数)
+              if(this.basicTrendTotal[index + this.lotteryNumbers.length + 3].max_missing < item){
+                this.basicTrendTotal[index + this.lotteryNumbers.length + 3].max_missing = item;
+              }
+            }
+          }
+          return item
+        })
+        // 当前号码大小-------------------------------------------------------------------------
+        let allBigSmall =  this.socketOpenResult.data.big_small[this.curNumTabIndex]
+        // 获取上一条数据的大小
+        let bigSmall = this.basicTrendDetails[0][3].row
+        // 大小新数组
+        let firearrBigSmall = bigSmall.map((item, index) => {
+          if(allBigSmall == '大') {
+            if(index == 0) {
+              item = 0
+              // 中奖号码大小总次数加1
+              this.basicTrendTotal[index + this.lotteryNumbers.length + 3 + 2].count++;
+            }else {
+              item++
+              // 当前最大遗漏数(如果当前遗漏数(item)大于上一期遗漏数(this.basicTrendTotal[index].max_missing)就改变遗漏数)
+              if(this.basicTrendTotal[index + this.lotteryNumbers.length + 3 + 2].max_missing < item){
+                this.basicTrendTotal[index + this.lotteryNumbers.length + 3 + 2].max_missing = item;
+              }
+            }
+          }else {
+            if(index == 1) {
+              item = 0
+              // 中奖号码大小总次数加1
+              this.basicTrendTotal[index + this.lotteryNumbers.length + 3 + 2].count++;
+            }else {
+              item++
+              // 当前最大遗漏数(如果当前遗漏数(item)大于上一期遗漏数(this.basicTrendTotal[index].max_missing)就改变遗漏数)
+              if(this.basicTrendTotal[index + this.lotteryNumbers.length + 3 + 2].max_missing < item){
+                this.basicTrendTotal[index + this.lotteryNumbers.length + 3 + 2].max_missing = item;
+              }
+            }
+          }
+          return item
+        })
+        // 拼接最新数据
+        let arrbasicTrendDetails = [
+          {expect: this.socketOpenResult.expect, row: firearrOpenNumbers, type: 'open_numbers', type_name: '球号'},
+          {expect: this.socketOpenResult.expect, row: firearrbackSwing, type: 'back_swing', type_name: '回摆'},
+          {expect: this.socketOpenResult.expect, row: firearrSingleDouble, type: 'single_double', type_name: '单双'},
+          {expect: this.socketOpenResult.expect, row: firearrBigSmall, type: 'big_small', type_name: '大小'}
+        ]
+        this.basicTrendDetails = [arrbasicTrendDetails, ...this.basicTrendDetails]
       }
     },
-    basicTrend() {
+    basicTrendDetails() {
       setTimeout(() => {
         this.drawTrend();
       }, 20);

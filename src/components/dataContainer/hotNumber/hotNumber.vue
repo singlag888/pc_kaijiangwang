@@ -51,8 +51,7 @@ export default {
   components: { openCode },
   data() {
     return {
-      list: [],
-      // curLength: 0
+      list: []
     };
   },
   mounted() {
@@ -70,7 +69,6 @@ export default {
       this.list = []
       this.getColdAndHotNumbers(code).then(res => {
         if (res.code == 200) {
-          // this.curLength = res.data.rows.length;
           // 无数据状态
           if(res.data.rows.length == 0) {
             this.$store.commit('IS_NO_CONTENT', true)
@@ -83,8 +81,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(["curLotteryCode", "socketOpenResult", "lotteryCodes", "isNoContent"]),
-
+    ...mapGetters(["curLotteryCode", "socketOpenResult", "lotteryCodes", "isNoContent", "socketColdHot"]),
     // 当前彩种的 location_name
     locationName() {
       for(let item of this.lotteryCodes) {
@@ -92,8 +89,7 @@ export default {
           return item.lottery_location_names
         }
       }
-    },
-    
+    }    
   },
   watch: {
     curLotteryCode: function() {
@@ -101,7 +97,12 @@ export default {
     },
     socketOpenResult: function() {
       if (this.socketOpenResult.code == this.curLotteryCode) {
-        this.getColdAndHotNumbersFunc(this.curLotteryCode);
+        // this.getColdAndHotNumbersFunc(this.curLotteryCode);
+        this.list = {
+          code: this.socketOpenResult.code,
+          code_type: this.socketOpenResult.code_type,
+          rows: this.socketColdHot
+        }
       }
     }
   }

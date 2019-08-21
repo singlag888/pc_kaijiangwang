@@ -98,13 +98,13 @@
       <div v-if="isNoContent" class="no-content">暂无数据</div>
       <div
         v-else
-        v-for="(item,index) in glassBeadList && glassBeadList.list"
+        v-for="(item,index) in glassBeadList"
         v-show="locationNameTitle[index].isChecked"
         :key="index"
       >
         <Trend
           v-show="luzuPlayList[key].isLuzu"
-          :glassBeadList="glassBeadList.list"
+          :glassBeadList="glassBeadList"
           :list="obj"
           v-for="(obj,key) in item"
           :cIndex="key"
@@ -218,8 +218,8 @@ export default {
           }else {
             this.$store.commit('IS_NO_CONTENT', false)
           }
-          this.glassBeadList = res.data;
-          
+          this.glassBeadList = res.data.list;   
+          this.test()      
         }
       });
     },
@@ -290,6 +290,37 @@ export default {
           });
         }
       }
+    },
+    test(){
+      //   for(let i=0; i<this.glassBeadList.length; i++) {
+      //   // console.log(this.glassBeadList[i])
+      //  for(let k=0; k<this.luzuPlayList.length; k++) {
+        
+      //       if(this.glassBeadList[i][k] != undefined){
+      //           let type = 'big_small';
+      //           switch(this.glassBeadList[i][k][0][0]){
+      //             case '单':
+      //               type = 'single_double';
+      //               break;
+      //             case '双':
+      //               type = 'single_double';
+      //               break;
+      //             case '龙':
+      //               type = 'dragon_tiger';
+      //               break;
+      //             case '虎':
+      //               type = 'dragon_tiger';
+      //               break;
+      //           }
+      //           if(this.glassBeadList[i][k][0][0] == [data][type][i]){
+
+      //           }else{
+
+      //           }
+              
+      //       }
+      //     }
+      //   }
     }
   },
   components: {
@@ -312,10 +343,34 @@ export default {
         this.socketOpenResult.code == this.curLotteryCode &&
         formatTime(this.curSelectTime, "YYYY-MM-DD") == getCurTime("YYYY-MM-DD")
       ) {
-        this.getGlassBeadTrendFunc(
-          this.curLotteryCode,
-          getCurTime("YYYY-MM-DD")
-        );
+        for(let i=0; i<this.glassBeadList.length; i++) {
+       for(let k=0; k<this.luzuPlayList.length; k++) {       
+            if(this.glassBeadList[i][k] != undefined){
+                let type = 'big_small';
+                switch(this.glassBeadList[i][k][0][0]){
+                  case '单':
+                    type = 'single_double';
+                    break;
+                  case '双':
+                    type = 'single_double';
+                    break;
+                  case '龙':
+                    type = 'dragon_tiger';
+                    break;
+                  case '虎':
+                    type = 'dragon_tiger';
+                    break;
+                }
+                if(this.glassBeadList[i][k][0][0] == this.socketOpenResult.data[type][i]){
+                      this.glassBeadList[i][k][0].unshift(this.socketOpenResult.data[type][i])
+                }else{
+                  let arr = []
+                  arr.unshift(this.socketOpenResult.data[type][i])
+                  this.glassBeadList[i][k].unshift(arr)
+                }            
+            }
+          }
+        }
       }
     }
   }

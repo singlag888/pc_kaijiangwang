@@ -95,13 +95,14 @@ export default {
   .indexContainer {
     margin: 0 auto;
     .advertisement {
-      padding-top:15px;
+      // padding-top:15px;
+      padding: 15px 0;
       width: 100%;
       font-size: 0;
       img {
         cursor: pointer;
         width: 100%;
-        margin-bottom: 15px;
+        // margin-bottom: 15px;
       }
     }
     .push{

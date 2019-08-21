@@ -73,6 +73,7 @@ export default {
     ...mapActions(["getForecastRanking", "chengecurLotteryCode"]),
 
     goTo(expertId, location, forecastQuantity) {
+      this.chengecurLotteryCode(this.curCode)
       this.closeRank();
       this.$store.commit('NUMBER_PLAN_PARAMS', { expertId, location, forecastQuantity})
     },

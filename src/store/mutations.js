@@ -86,6 +86,20 @@ const mutations = {
     state.socketOpenResult = obj;
   },
 
+  //websocket长龙
+  [types.SOCKET_LONG_DRAGON](state, data) {
+    state.socketLongDragon = data;
+  },
+
+  //websocket双面
+  [types.SOCKET_SIDES_TOTAL](state, data) {
+    state.socketSidesTotal = data;
+  },
+  //websocket冷热
+  [types.SOCKET_COLD_HOT](state, data) {
+    state.socketColdHot = data;
+  },
+
   //websocket計劃
   [types.SOCKET_PLAN_RESULT](state, obj) {
     state.socketPlanResult = obj;

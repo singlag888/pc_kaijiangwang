@@ -66,9 +66,9 @@
             <td style="font-size: 20px;color: #666;">暂无数据</td>
           </tr>
           <tr v-else>
-            <td v-if="dragonData.length > 0">
+            <td v-if="curdragonData.length > 0">
               <span
-                v-for="(data, index) in dragonData"
+                v-for="(data, index) in curdragonData"
                 :key="index+'_d'"
               >{{data.location_name}}</span>
             </td>
@@ -135,19 +135,19 @@
             <span class="no-content">暂无数据</span>
           </td>               
         </tr>
-        <tr v-for="(item, index) in lotteryData" :key="index+'_t'">
+        <tr v-for="(item, index) in curlotteryData" :key="index+'_t'">
           <td class="time">{{item.expect}} {{item.open_datetime.split(' ')[1]}}</td>
-          <td class="nums" v-if="lotteryDatas.length > 0">
+          <td class="nums" v-if="curlotteryDatas.length > 0">
             <openCode
               :doubleNumber="doubleNumberCount(index)"
               :showSpecialNumber="showSpecialNumber"
               :selectedOpenNumber="selectedOpenNumber"
               :selectedNumberType="selectedNumberType"
               :selectedTableShowData="selectedTableShowData"
-              :allResult="lotteryDatas[index]"
+              :allResult="curlotteryDatas[index]"
               :code="lotteryCode"
               :codeType="lotteryType"
-              :result="lotteryDatas[index][selectedTableShowData]"
+              :result="curlotteryDatas[index][selectedTableShowData]"
             />
           </td>
           <td class="nums" v-else></td>
@@ -171,7 +171,6 @@ import { getCurTime, formatTime } from "@/assets/js/utils";
 import Datepicker from "vuejs-datepicker";
 import { zh } from "vuejs-datepicker/dist/locale";
 import openCode from "@/components/base/openCode/openCode.vue";
-import { constants } from 'crypto';
 
 export default {
   name: "historyData",
@@ -181,6 +180,9 @@ export default {
       selectedOpenNumber: null, //查看球号分布 选中的球号
       selectedNumberType: "reset",
       sidesTotal: [], //双面统计
+      curdragonData: [],//长龙
+      curlotteryData: [],
+      curlotteryDatas:[],
       selectedTableShowData: "open_numbers", //数据表头显示的类型 big_small single_double
       curSelectTime: new Date(),
       dateOption: {
@@ -201,6 +203,24 @@ export default {
     }, 20);
   },
   watch: {
+    'dragonData':{
+      handler(val, b) {
+        this.curdragonData = val
+      },
+      deep: true
+    },
+    'lotteryData':{
+      handler(val, b) {
+        this.curlotteryData = val
+      },
+      deep: true
+    },
+    'lotteryDatas':{
+      handler(val, b) {
+        this.curlotteryDatas = val
+      },
+      deep: true
+    },
     curLotteryCode() {
       this.bigSmallSingalDoubleReset()
       this.resetSelectedNumber()
@@ -212,52 +232,23 @@ export default {
     },
     socketOpenResult: function() {
       if(this.socketOpenResult.code == this.curLotteryCode && formatTime(this.curSelectTime, "YYYY-MM-DD") == getCurTime("YYYY-MM-DD")) {
-        this.getLotteryData({
-          open_date: formatTime(this.curSelectTime, "YYYY-MM-DD"),
-          code: this.curLotteryCode
-        });
+        // 拼接最新历史数据列表(两侧)
+        let curlotteryDataObj = Object.assign(this.socketOpenResult.data,{expect: this.socketOpenResult.expect,open_datetime: this.socketOpenResult.open_datetime})       
+        this.curlotteryData = [curlotteryDataObj, ...this.curlotteryData]
+        // 拼接最新历史数据列表(开奖号码)
+        let curlotteryDatasObj = this.socketOpenResult.data
+        this.curlotteryDatas = [curlotteryDatasObj, ...this.curlotteryDatas]
         if(this.isLongDragon == 1) {
-          this.getLongDragon({ code: this.curLotteryCode });
+          this.curdragonData = this.socketLongDragon
         }
         if(this.isSidesTotal == 1) {
-          this.getSidesTotalFunc(
-            this.curLotteryCode,
-            formatTime(this.curSelectTime, "YYYY-MM-DD")
-          );
+          this.sidesTotal = this.socketSidesTotal
         }
       }
     }
   },
   methods: {
     ...mapActions(["getLotteryData", "getLongDragon", "getSidesTotal"]),
-
-    // 转换数据过滤相同数据
-    // filterData(list) {
-    //   let data = list;
-    //   let obj = {};
-    //   let arr =
-    //     data &&
-    //     data.reduce(function(item, next) {
-    //       obj[next.location]
-    //         ? ""
-    //         : (obj[next.location] = true && item.push(next));
-    //       return item;
-    //     }, []);
-
-    //   arr &&
-    //     arr.forEach(temp => {
-    //       let len = 0;
-    //       data &&
-    //         data.forEach(item => {
-    //           if (temp.location == item.location) {
-    //             len++;
-    //           }
-    //         });
-    //       this.$set(temp, "len", len);
-    //     });
-    //   return arr;
-    // },
-
     // 选择日期
     selectedTime() {
       this.getLotteryData({
@@ -287,20 +278,22 @@ export default {
     //计算是否标识对子号
     doubleNumberCount(index) {
       var res = [];
-      var data = this.lotteryDatas;
-      var selfData = data[index].open_numbers;
-      // console.log(selfData)
-      var previewData, nextData;
-      data[index - 1] ? (previewData = data[index - 1].open_numbers) : null;
-      data[index + 1] ? (nextData = data[index + 1].open_numbers) : null;
-      for (var i = 0; i < selfData.length; i++) {
-        if (
-          (previewData && selfData[i] == previewData[i]) ||
-          (nextData && selfData[i] == nextData[i])
-        ) {
-          res.push(i);
+      // if(this.curlotteryDatas.length > 0 && this.curlotteryDatas[index].open_numbers != undefined) {
+        var data = this.curlotteryDatas
+        var selfData = data[index].open_numbers;
+        var previewData, nextData;
+        data[index - 1] ? (previewData = data[index - 1].open_numbers) : null;
+        data[index + 1] ? (nextData = data[index + 1].open_numbers) : null;
+        for (var i = 0; i < selfData.length; i++) {
+          if (
+            (previewData && selfData[i] == previewData[i]) ||
+            (nextData && selfData[i] == nextData[i])
+          ) {
+            res.push(i);
+          }
         }
-      }
+      // }
+      
       return res;
     },
     //大小单双分布按钮还原
@@ -376,6 +369,8 @@ export default {
       "lotteryCode",
       "screeningParameter",
       "socketOpenResult",
+      "socketLongDragon",
+      "socketSidesTotal",
       "lotteryCodes",
       "isNoContent",
       "dragonDataNoData"

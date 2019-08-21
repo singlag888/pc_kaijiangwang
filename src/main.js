@@ -62,6 +62,12 @@ new Vue({
     getConfigResult(result){
       if(result.type == 'lottery_data'){
         store.commit('SOCKET_OPEN_RESULT', result.data)
+        //长龙
+        store.commit('SOCKET_LONG_DRAGON', result.long_dragon)
+        //双面
+        store.commit('SOCKET_SIDES_TOTAL', result.sides_total)
+        //冷热
+        store.commit('SOCKET_COLD_HOT', result.cold_and_hot)
       }
       if(result.type == 'max_forecast_plan'){
         store.commit('SOCKET_PLAN_RESULT', result.data)

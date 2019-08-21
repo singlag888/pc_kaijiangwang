@@ -68,6 +68,15 @@ export const dragonData =state=> state.dragonData;
 //websocket开奖结果
 export const socketOpenResult =state=> state.socketOpenResult;
 
+//websocket长龙
+export const socketLongDragon =state=> state.socketLongDragon;
+
+//websocket双面
+export const socketSidesTotal =state=> state.socketSidesTotal;
+
+//websocket冷热
+export const socketColdHot =state=> state.socketColdHot;
+
 //websocket計劃
 export const socketPlanResult =state=> state.socketPlanResult;
 
